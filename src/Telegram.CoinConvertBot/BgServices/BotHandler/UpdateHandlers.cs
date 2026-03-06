@@ -13422,7 +13422,7 @@ private static readonly List<string> CurrencyOrder = new List<string>
 {
     "CNY","USD", "HKD", "TWD", "JPY", "GBP", "EUR", "AUD", "KRW", "THB", "VND",
     "LAK", "MMK", "INR", "CHF", "NZD", "SGD", "KHR", "PHP", "MXN", "AED",
-    "RUB", "CAD", "MYR", "KWD"
+    "RUB", "CAD", "MYR", "KWD", "MGA" 
 };
 public class ExchangeRateData
 {
@@ -13514,7 +13514,12 @@ private static readonly Dictionary<string, string> CurrencyAliases = new Diction
     {"披索", "PHP"},
     {"比索", "MXN"},    
     {"马币", "MYR"},	
-    {"第纳尔", "KWD"},	
+    {"第纳尔", "KWD"},
+	{"阿里亚里", "MGA"},
+    {"阿里", "MGA"},          
+    {"马达加斯加阿里", "MGA"}, 
+	{"马达加斯加币", "MGA"}, 
+	{"马达加斯加", "MGA"}, 
     {"卢比", "INR"}	
 };
 private static readonly Dictionary<string, (string Name, string Symbol)> CurrencyMappings = new Dictionary<string, (string, string)>
@@ -13543,6 +13548,7 @@ private static readonly Dictionary<string, (string Name, string Symbol)> Currenc
     {"RUB", ("俄罗斯卢布", "₽")},
     {"CAD", ("加拿大加元", "C$")},
     {"MYR", ("马来西亚币", "RM")},
+	{"MGA", ("马达加斯加阿里亚里", "Ar")},
     {"KWD", ("科威特第纳尔", "KD")}
 };    
 private static readonly Dictionary<string, string> CurrencyFullNames = new Dictionary<string, string>
@@ -13570,6 +13576,7 @@ private static readonly Dictionary<string, string> CurrencyFullNames = new Dicti
     { "CHF", "瑞士法郎" },
     { "CAD", "加拿大加元" },
     { "MXN", "墨西哥比索" },
+	{ "MGA", "阿里亚里" },
     { "NZD", "新西兰元" },
 };
 static bool TryGetRateByCurrencyCode(Dictionary<string, (decimal, string)> rates, string currencyCode, out KeyValuePair<string, (decimal, string)> rate)
@@ -13708,7 +13715,8 @@ static async Task<Dictionary<string, (decimal, string)>> GetCurrencyRatesAsync()
             { "俄罗斯卢布 (RUB)", (ratesElement.GetProperty("RUB").GetDecimal(), "₽") },
             { "加拿大加元 (CAD)", (ratesElement.GetProperty("CAD").GetDecimal(), "C$") },
             { "马来西亚币 (MYR)", (ratesElement.GetProperty("MYR").GetDecimal(), "RM") },
-            { "科威特第纳尔 (KWD)", (ratesElement.GetProperty("KWD").GetDecimal(), "KD") }
+            { "科威特第纳尔 (KWD)", (ratesElement.GetProperty("KWD").GetDecimal(), "KD") },
+			{ "马达加斯加阿里亚里 (MGA)", (ratesElement.GetProperty("MGA").GetDecimal(), "Ar") }
         };
     }
     catch (Exception)
