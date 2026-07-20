@@ -16547,6 +16547,14 @@ else if(update.CallbackQuery.Data == "mingling" && update.CallbackQuery.From.Id 
 else if(update.CallbackQuery.Data == "shoucang")
 {
     string favoriteLinks = @"<b>币圈：</b>
+龙卷风：https://app.tornado.cash/
+
+跨链：
+https://app.debridge.com/
+https://across.to/
+https://jumper.xyz/zh
+https://swap.thorchain.org/
+
 paxful：https://paxful.com/zh  （无需实名 otc交易）
 hyperliquid：https://app.hyperliquid.xyz/trade/BTC （链上第一去中心化交易所）
 Hyperliquid鲸鱼动态监控：https://coinank.com/zh/hyperliquid
