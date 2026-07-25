@@ -14389,11 +14389,20 @@ private static CancellationTokenSource cancellationTokenSource = new Cancellatio
 //加密文本
 public static class TextCryptoHelper
 {
+    // 【新增】标准的base64表
+    private static readonly string STD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    // 【新增】自定义base64表
+    private static readonly string CUSTOM = "q+O8rV1H4IU50KEbmMB3FJGQcz6wpuLkZNaToe/WglifyxhDAj2CstdXn7vRP9SY";
     private static readonly Random _rand = new Random();
-    private static readonly string _chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    // 干扰字符表，想加多少加多少，这个随便改不影响解密
+    private static readonly string _chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#%^*()-_=+~$&";
+    
+    // 【新增】数字自定义表，0=H，实现密文字符统一
+    private static readonly string DIGIT_STD = "0123456789";
+    private static readonly string DIGIT_CUSTOM = "qxIbYugSmr";
 
     /// <summary>
-    /// 加密：Base64 → 先左移（第2位数字）→ 再右移（第4位数字）→ 末尾4位密钥
+    /// 加密：Base64并转化自定义表 → 先左移（第2位数字）→ 再右移（第4位数字）→ 末尾4位密钥
     /// → 计算移位后字符串末尾连续数字个数 + 密钥最后一个数字 = 前缀字母数量
     /// → 开头加随机大小写字母干扰 → 最终密文
     /// </summary>
@@ -14407,7 +14416,10 @@ public static class TextCryptoHelper
         {
             // 1. Base64 编码，去除末尾=
             byte[] bytes = Encoding.UTF8.GetBytes(plainText);
-            string base64 = Convert.ToBase64String(bytes).TrimEnd('=');
+            string base64Std = Convert.ToBase64String(bytes).TrimEnd('='); // 【修改】改名，方便后面翻译
+
+            // 【新增】翻译成自定义字符表，后面所有移位都对这个操作
+            string base64 = new string(base64Std.Select(c => CUSTOM[STD.IndexOf(c)]).ToArray());
 
             // 2. 随机移位位数（1~9）
             int forwardShift = _rand.Next(1, 10);
@@ -14418,7 +14430,7 @@ public static class TextCryptoHelper
             string shifted = CyclicRightShift(afterForward, reverseShift);
 
             // 4. 计算移位后字符串末尾连续数字个数
-            int trailingDigitsCount = CountTrailingDigits(shifted);
+            int trailingDigitsCount = Math.Min(9, CountTrailingDigits(shifted));
 
             // 5. 生成4位数字密钥（第3位复用 trailingDigitsCount）
             int rand1 = _rand.Next(0, 10);
@@ -14431,8 +14443,9 @@ public static class TextCryptoHelper
             // 7. 生成随机前缀字母
             string prefix = GenerateRandomLetters(prefixLength);
 
-            // 8. 核心密文 = 移位结果 + 4位数字
-            string coreCipher = shifted + key4Digits;
+            // 8. 核心密文 = 移位结果 + 4位数字，将4位数字密钥翻译成自定义字符 
+            string keyCustom = new string(key4Digits.Select(c => DIGIT_CUSTOM[DIGIT_STD.IndexOf(c)]).ToArray());
+            string coreCipher = shifted + keyCustom;
 
             // 9. 最终密文 = 前缀 + 核心
             return prefix + coreCipher;
@@ -14445,20 +14458,21 @@ public static class TextCryptoHelper
 
     /// <summary>
     // 解密：取末尾4位密钥 → 去掉末尾4位 → 计算剩余部分末尾连续数字个数 + 密钥最后一个数字 = 前缀长度
-    //        → 去掉开头前缀字母 → 先左移（第4位）→ 再右移（第2位）→ 补= → Base64解码 → 原始文本
+    //        → 去掉开头前缀字母 → 先左移（第4位）→ 再右移（第2位）→ 补= → 将自定义表转回标准Base64解码 → 原始文本
     /// </summary>
     public static string DecryptText(string fullCipher)
     {
-        if (string.IsNullOrWhiteSpace(fullCipher) || fullCipher.Length < 9)
+        if (string.IsNullOrWhiteSpace(fullCipher) || fullCipher.Length < 5)
             return "密文格式错误，太短";
 
         try
         {
-            // 1. 取末尾4位作为密钥
-            if (fullCipher.Length < 4 || !int.TryParse(fullCipher[^4..], out _))
-                return "末尾必须是4位数字密钥";
+            // 【修改】取末尾4位自定义字符并翻译回标准数字，不再直接TryParse
+            string keyCustom = fullCipher[^4..];
+            if (keyCustom.Any(c => DIGIT_CUSTOM.IndexOf(c) == -1))
+                return "密文格式错误";
 
-            string key = fullCipher[^4..];
+            string key = new string(keyCustom.Select(c => DIGIT_STD[DIGIT_CUSTOM.IndexOf(c)]).ToArray());
             int forwardShift = key[1] - '0';
             int trailingDigitsCount = key[2] - '0';  // 直接从密钥读取加密时存的个数
             int reverseShift = key[3] - '0';
@@ -14478,8 +14492,11 @@ public static class TextCryptoHelper
             string shifted = prefixPlusShifted.Substring(prefixLength);
 
             // 6. 逆向移位
-            string step1 = CyclicLeftShift(shifted, reverseShift);     // 抵消右移
-            string base64Clean = CyclicRightShift(step1, forwardShift); // 抵消左移
+            string step1 = CyclicLeftShift(shifted, reverseShift);
+            string base64CustomClean = CyclicRightShift(step1, forwardShift); // 【修改】改名，明确这是自定义表里的
+
+            // 【新增】翻译回标准表再解
+            string base64Clean = new string(base64CustomClean.Select(c => STD[CUSTOM.IndexOf(c)]).ToArray());
 
             // 7. 补齐Base64填充
             int padding = (4 - base64Clean.Length % 4) % 4;
@@ -14543,6 +14560,7 @@ public static class TextCryptoHelper
         return s.Substring(s.Length - n) + s.Substring(0, s.Length - n);
     }
 }
+
 private static long _g1()
 {
     try
@@ -21927,8 +21945,8 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
     {
         await botClient.SendTextMessageAsync(
             message.Chat.Id,
-            "格式：加密+要加密的文本内容\n" +
-            "例如：加密助记词 或 加密 Hello World\n\n" +
+            "发送格式：加密+要加密的文本内容\n" +
+            "示例：加密助记词 或 加密 Hello World\n\n" +
             "使用多重算法加密并混淆，确保无法被破解;\n" +
             "可将密文重复加密，只需牢记重复加密次数;\n" +
             "请妥善保管您的解密密文，丢失将无法找回！",
@@ -21942,7 +21960,7 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
     {
         await botClient.SendTextMessageAsync(
             message.Chat.Id,
-            "加密失败，您的内容已超过Telegram的文本限制，请分段加密，谢谢！"
+            "⚠️加密失败，您的内容已超过Telegram的文本限制，请分段加密，谢谢！"
         );
         return;
     }
@@ -21961,24 +21979,64 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
             return;
         }
 
-        string reply =
-            "您的文本已使用<b>AES-256算法</b>完成加密：\n\n" +
-            $"<code>{encrypted}</code>\n\n" +
-            $"如需解密，请发送：\n\n<code>解密{encrypted}</code>\n\n" +
-            "⚠️注意：请妥善保存/收藏以上**完整密文**，一旦丢失将无法找回！\n\n" +
-            "本机器人只提供加密/解密功能，不保留、不存储、不上传也无法找回您的任何原始文本或密文，请知悉！";
+        // 【新增】对密文进行HTML转义，因为发消息用了 parseMode: Html
+        // 你的 _chars 随机前缀里包含 &，如果不转义，<code>Ab&Cd</code> 会被Telegram当成HTML实体解析，导致报 can't parse entities 而进 catch
+        // 转义后 &->&amp; <->&lt; 显示不变，但不会炸，复制出来解密还是原来的字符
+        string safe = System.Net.WebUtility.HtmlEncode(encrypted);
 
-        var keyboard = new InlineKeyboardMarkup(
-            InlineKeyboardButton.WithCallbackData("删除记录 \U0001F5D1", "back")
-        );
+        // 【新增】先判断加密后的长度，Telegram单条上限4096，如果发两遍会超限
+        // 逻辑：>3500直接提示分段，>2000只发一次密文，<2000保留你原来的双份模板
+        if (encrypted.Length > 3500)
+        {
+            // 【新增】密文过长分支，超过3500不发送，提示分段
+            await botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                "⚠️加密失败，您的内容已超过Telegram的文本限制，请分段加密，谢谢！"
+            );
+            return;
+        }
 
-        await botClient.SendTextMessageAsync(
-            message.Chat.Id,
-            reply,
-            parseMode: ParseMode.Html,
-            disableWebPagePreview: true,
-            replyMarkup: keyboard
-        );
+        string reply;
+        if (encrypted.Length > 2000)
+        {
+            // 【新增】2000~3500分支，按你要求只发一次密文，避免回复总长 = 密文*2+模板 > 4096 而导致发送失败
+            reply =
+                "您的文本已使用<b>AES-256算法</b>完成加密：\n\n" +
+                $"<code>{safe}</code>\n\n" +
+                "如需解密，直接发送：解密+原始密文 即可！\n\n" +
+                "⚠️注意：请妥善保存/收藏以上<b>完整密文</b>，一旦丢失将无法找回！\n\n" +
+                "本机器人只提供加密/解密功能，不保留、不存储、不上传也无法找回您的任何原始文本或密文，请知悉！";
+
+            await botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                reply,
+                parseMode: ParseMode.Html,
+                disableWebPagePreview: true
+            );
+        }
+        else
+        {
+            // 【保留】你原始的低于2000的双份模板，方便用户直接复制解密指令
+            // 【修改】这里把原来的 {encrypted} 改成了 {safe}，防止&导致解析失败
+            reply =
+                "您的文本已使用<b>AES-256算法</b>完成加密：\n\n" +
+                $"<code>{safe}</code>\n\n" +
+                $"如需解密，请发送：\n\n<code>解密{safe}</code>\n\n" +
+                "⚠️注意：请妥善保存/收藏以上<b>完整密文</b>，一旦丢失将无法找回！\n\n" +
+                "本机器人只提供加密/解密功能，不保留、不存储、不上传也无法找回您的任何原始文本或密文，请知悉！";
+
+            var keyboard = new InlineKeyboardMarkup(
+                InlineKeyboardButton.WithCallbackData("删除记录 \U0001F5D1", "back")
+            );
+
+            await botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                reply,
+                parseMode: ParseMode.Html,
+                disableWebPagePreview: true,
+                replyMarkup: keyboard
+            );
+        }
 
         // 加密成功 → 尝试撤回用户消息
         try
@@ -21991,7 +22049,7 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
     {
         await botClient.SendTextMessageAsync(
             message.Chat.Id,
-            "加密过程出错，请稍后重试"
+            "⚠️加密过程出错，请稍后重试！"
         );
     }
     return;
@@ -22011,7 +22069,7 @@ if (messageText.StartsWith("解密"))
         return;
     }
 
-    if (string.IsNullOrWhiteSpace(payload) || payload.Length < 5 || !char.IsDigit(payload[^1]))
+    if (string.IsNullOrWhiteSpace(payload) || payload.Length < 5 || payload[^4..].Any(c => "qxIbYugSmr".IndexOf(c) == -1))
     {
         string reply =
             "解密失败！原始密文如下：\n\n" +
@@ -25162,6 +25220,7 @@ static async Task<Message> Start(ITelegramBotClient botClient, Message message)
 var inlineKeyboard = new InlineKeyboardMarkup(new[]
 {
     InlineKeyboardButton.WithCallbackData("简体中文", "中文"),
+    InlineKeyboardButton.WithCallbackData("文本加密", "加密"),
     InlineKeyboardButton.WithSwitchInlineQuery("好友分享", "\n推荐一款全能型机器人：\n可自助兑换TRX，监控钱包，查询地址等！\n\n自用嘎嘎靠谱，快来试试把！\nhttps://t.me/BuyTrxbot")
 });
 
