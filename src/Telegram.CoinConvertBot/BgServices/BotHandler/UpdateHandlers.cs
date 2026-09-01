@@ -13421,14 +13421,16 @@ public static async Task<(decimal UsdtTotal, int TransferCount, bool IsError)> G
 private static readonly List<string> CurrencyOrder = new List<string>
 {
     "CNY","USD", "HKD", "TWD", "JPY", "GBP", "EUR", "AUD", "KRW", "THB", "VND",
-    "LAK", "MMK", "INR", "CHF", "NZD", "SGD", "KHR", "PHP", "MXN", "AED",
+    "LAK", "MMK", "INR", "PKR", "CHF", "NZD", "SGD", "KHR", "PHP", "MXN", "AED",
     "RUB", "CAD", "MYR", "KWD", "MGA" 
 };
+
 public class ExchangeRateData
 {
     public string Base { get; set; }
     public Dictionary<string, decimal> Rates { get; set; }
 }
+
 private static async Task<string> GetExchangeRatesAsync(decimal amount, string baseCurrency, bool fullList = false)
 {
     decimal usdtToCnyRate = await GetOkxPriceAsync("usdt", "cny", "sell");
@@ -13500,6 +13502,7 @@ private static async Task<string> GetExchangeRatesAsync(decimal amount, string b
         return $"在获取汇率时发生错误：{ex.Message}";
     }
 }
+
 private static readonly Dictionary<string, string> CurrencyAliases = new Dictionary<string, string>
 {
     {"元", "CNY"},
@@ -13520,8 +13523,15 @@ private static readonly Dictionary<string, string> CurrencyAliases = new Diction
     {"马达加斯加阿里", "MGA"}, 
 	{"马达加斯加币", "MGA"}, 
 	{"马达加斯加", "MGA"}, 
-    {"卢比", "INR"}	
+    {"卢比", "INR"},
+    // 新增：区分用，不使用已在Mappings中存在的“印度卢比”和“巴基斯坦卢比”避免重复Key
+    {"印度", "INR"},
+    {"印卢比", "INR"},
+    {"巴基斯坦", "PKR"},
+    {"巴卢比", "PKR"},
+    {"PKR", "PKR"}
 };
+
 private static readonly Dictionary<string, (string Name, string Symbol)> CurrencyMappings = new Dictionary<string, (string, string)>
 {
     {"CNY", ("人民币", "¥")},
@@ -13538,6 +13548,7 @@ private static readonly Dictionary<string, (string Name, string Symbol)> Currenc
     {"LAK", ("老挝币", "₭")},
     {"MMK", ("缅甸币", "K")},
     {"INR", ("印度卢比", "₹")},
+    {"PKR", ("巴基斯坦卢比", "₨")},
     {"CHF", ("瑞士法郎", "Fr")},
     {"NZD", ("新西兰元", "NZ$")},
     {"SGD", ("新加坡新元", "S$")},
@@ -13551,6 +13562,7 @@ private static readonly Dictionary<string, (string Name, string Symbol)> Currenc
 	{"MGA", ("马达加斯加阿里亚里", "Ar")},
     {"KWD", ("科威特第纳尔", "KD")}
 };    
+
 private static readonly Dictionary<string, string> CurrencyFullNames = new Dictionary<string, string>
 {
     { "USD", "美元" },
@@ -13564,6 +13576,7 @@ private static readonly Dictionary<string, string> CurrencyFullNames = new Dicti
     { "THB", "泰铢" },
     { "VND", "越南盾" },
     { "INR", "卢比" },
+    { "PKR", "巴基斯坦币" },
     { "SGD", "新币" },
     { "KHR", "瑞尔" },
     { "PHP", "披索" },
@@ -13579,6 +13592,7 @@ private static readonly Dictionary<string, string> CurrencyFullNames = new Dicti
 	{ "MGA", "阿里亚里" },
     { "NZD", "新西兰元" },
 };
+
 static bool TryGetRateByCurrencyCode(Dictionary<string, (decimal, string)> rates, string currencyCode, out KeyValuePair<string, (decimal, string)> rate)
 {
     foreach (var entry in rates)
@@ -13593,11 +13607,13 @@ static bool TryGetRateByCurrencyCode(Dictionary<string, (decimal, string)> rates
     rate = default;
     return false;
 }
+
 // 将 maxPage 提升为类的成员变量
 private static int CalculateMaxPage(Dictionary<string, (decimal, string)> rates, int itemsPerPage)
 {
     return (int)Math.Ceiling((double)rates.Count / itemsPerPage);
 }
+
 public static async Task HandleCurrencyRatesCommandAsync(ITelegramBotClient botClient, Message message, int page, bool updateMessage = false)
 {
     var rates = await GetCurrencyRatesAsync();
@@ -13662,6 +13678,7 @@ public static async Task HandleCurrencyRatesCommandAsync(ITelegramBotClient botC
         );
     }
 }     
+
 static async Task<Dictionary<string, (decimal, string)>> GetCurrencyRatesAsync()
 {
     var apiUrl = "https://api.exchangerate-api.com/v4/latest/CNY"; // CNY为人民币代号
@@ -13705,6 +13722,7 @@ static async Task<Dictionary<string, (decimal, string)>> GetCurrencyRatesAsync()
             { "老挝币 (LAK)", (ratesElement.GetProperty("LAK").GetDecimal(), "₭") },
             { "缅甸币 (MMK)", (ratesElement.GetProperty("MMK").GetDecimal(), "K") },       
             { "印度卢比 (INR)", (ratesElement.GetProperty("INR").GetDecimal(), "₹") },
+            { "巴基斯坦卢比 (PKR)", (ratesElement.GetProperty("PKR").GetDecimal(), "₨") },
             { "瑞士法郎 (CHF)", (ratesElement.GetProperty("CHF").GetDecimal(), "Fr") },   
             { "新西兰元 (NZD)", (ratesElement.GetProperty("NZD").GetDecimal(), "NZ$") },            
             { "新加坡新元 (SGD)", (ratesElement.GetProperty("SGD").GetDecimal(), "S$") },
