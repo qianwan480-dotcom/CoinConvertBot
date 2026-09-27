@@ -13431,76 +13431,110 @@ public class ExchangeRateData
     public Dictionary<string, decimal> Rates { get; set; }
 }
 
+// 汇率缓存字典：Key = 货币代码，Value = (汇率数据, 获取时间)
+private static readonly Dictionary<string, (ExchangeRateData Data, DateTime FetchTime)> WaihuiCache = new();
+private static readonly object WaihuiCacheLock = new object();
+private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(23); // 缓存有效期 23 小时
+
 private static async Task<string> GetExchangeRatesAsync(decimal amount, string baseCurrency, bool fullList = false)
 {
     decimal usdtToCnyRate = await GetOkxPriceAsync("usdt", "cny", "sell");
 
-    try
+    ExchangeRateData exchangeData = null;
+
+    // ========== 缓存逻辑开始 ==========
+    lock (WaihuiCacheLock)
     {
-        using (var httpClient = new HttpClient())
+        if (WaihuiCache.TryGetValue(baseCurrency, out var cacheItem))
         {
-            string apiUrl = $"https://api.exchangerate-api.com/v4/latest/{baseCurrency}";
-            var response = await httpClient.GetAsync(apiUrl);
-            string content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            // 判断缓存是否在 23 小时内
+            if (DateTime.Now - cacheItem.FetchTime < CacheDuration)
             {
-                return $"获取汇率失败，状态码：{response.StatusCode}";
+                exchangeData = cacheItem.Data; // 使用缓存数据
             }
-
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var exchangeData = JsonSerializer.Deserialize<ExchangeRateData>(content, options);
-
-            if (exchangeData == null || exchangeData.Rates == null)
-            {
-                return "无法获取汇率数据。";
-            }
-
-            StringBuilder result = new StringBuilder($"<b>{amount} {CurrencyMappings[baseCurrency].Name}兑换汇率 ≈</b>\n\n");
-
-            // 计算并添加USDT汇率
-            if (exchangeData.Rates.TryGetValue("CNY", out var cnyRate))
-            {
-                decimal amountInCny = amount * cnyRate;
-                decimal amountInUsdt = amountInCny / usdtToCnyRate;
-                result.AppendLine($"<code>{amountInUsdt.ToString("N2")} 泰达币(USDT)</code>\n————————————");
-            }
-
-            int count = 0;
-            int totalRates = exchangeData.Rates.Count(r => CurrencyOrder.Contains(r.Key) && r.Key != baseCurrency);
-            int ratesToShow = fullList ? totalRates : Math.Min(10, totalRates);
-
-            foreach (var currencyCode in CurrencyOrder)
-            {
-                if (currencyCode == baseCurrency || !exchangeData.Rates.TryGetValue(currencyCode, out var rate)) // 跳过查询的货币本身和未找到汇率的货币
-                {
-                    continue;
-                }
-
-                decimal convertedAmount = amount * rate;
-                if (CurrencyMappings.TryGetValue(currencyCode, out var currencyInfo))
-                {
-                    count++;
-                    result.Append($"<code>{convertedAmount.ToString("N2")} {currencyInfo.Name} ({currencyCode})</code>");
-                    if (count < ratesToShow) // 如果当前条目不是最后一个，则添加横线
-                    {
-                        result.AppendLine("\n————————————");
-                    }
-                    else
-                    {
-                        result.AppendLine(); // 最后一个条目后不添加横线，只换行
-                    }
-                    if (!fullList && count >= 10) break; // 如果不是请求完整列表且已添加10条数据，则停止添加
-                }
-            }
-
-            return result.ToString();
         }
     }
-    catch (Exception ex)
+
+    // 如果没有有效缓存，则请求 API
+    if (exchangeData == null)
     {
-        return $"在获取汇率时发生错误：{ex.Message}";
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                string apiUrl = $"https://api.exchangerate-api.com/v4/latest/{baseCurrency}";
+                var response = await httpClient.GetAsync(apiUrl);
+                string content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return $"获取汇率失败，状态码：{response.StatusCode}";
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                exchangeData = JsonSerializer.Deserialize<ExchangeRateData>(content, options);
+
+                if (exchangeData == null || exchangeData.Rates == null)
+                {
+                    return "无法获取汇率数据。";
+                }
+
+                // 写入/覆盖缓存
+                lock (WaihuiCacheLock)
+                {
+                    WaihuiCache[baseCurrency] = (exchangeData, DateTime.Now);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return $"在获取汇率时发生错误：{ex.Message}";
+        }
     }
+    // ========== 缓存逻辑结束 ==========
+
+    // 后面生成结果的代码保持不变
+    StringBuilder result = new StringBuilder($"<b>{amount} {CurrencyMappings[baseCurrency].Name}兑换汇率 ≈</b>\n\n");
+
+    // 计算并添加USDT汇率
+    if (exchangeData.Rates.TryGetValue("CNY", out var cnyRate))
+    {
+        decimal amountInCny = amount * cnyRate;
+        decimal amountInUsdt = amountInCny / usdtToCnyRate;
+        result.AppendLine($"<code>{amountInUsdt.ToString("N2")} 泰达币(USDT)</code>\n————————————");
+    }
+
+    int count = 0;
+    int totalRates = exchangeData.Rates.Count(r => CurrencyOrder.Contains(r.Key) && r.Key != baseCurrency);
+    int ratesToShow = fullList ? totalRates : Math.Min(10, totalRates);
+
+    foreach (var currencyCode in CurrencyOrder)
+    {
+        if (currencyCode == baseCurrency || !exchangeData.Rates.TryGetValue(currencyCode, out var rate)) // 跳过查询的货币本身和未找到汇率的货币
+        {
+            continue;
+        }
+
+        decimal convertedAmount = amount * rate;
+        if (CurrencyMappings.TryGetValue(currencyCode, out var currencyInfo))
+        {
+            count++;
+            result.Append($"<code>{convertedAmount.ToString("N2")} {currencyInfo.Name} ({currencyCode})</code>");
+
+            if (count < ratesToShow) // 如果当前条目不是最后一个，则添加横线
+            {
+                result.AppendLine("\n————————————");
+            }
+            else
+            {
+                result.AppendLine(); // 最后一个条目后不添加横线，只换行
+            }
+
+            if (!fullList && count >= 10) break; // 如果不是请求完整列表且已添加10条数据，则停止添加
+        }
+    }
+
+    return result.ToString();
 }
 
 private static readonly Dictionary<string, string> CurrencyAliases = new Dictionary<string, string>
@@ -15824,7 +15858,7 @@ if (update.Type == UpdateType.Message)
                 // 修改正则表达式以匹配带小数点的数字计算
                 var containsKeywordsOrCommandsOrNumbersOrAtSign = Regex.IsMatch(inputText, @"^\/(start|yi|fan|qdgg|yccl|fu|btc|xamzhishu|xgzhishu|swap|lamzhishu|about|qiand|shiwukxian|music|mairumaichu|charsi|provip|huiyuanku|zdcrsi|usd|more|usdt|tron|z0|cny|trc|home|jiankong|caifu|help|qunliaoziliao|baocunqunliao|bangdingdizhi|zijin|faxian|chaxun|xuni|ucard|jisuzhangdie|bijiacha|jkbtc)|更多功能|人民币|能量租赁|实时汇率|U兑TRX|合约助手|询千百度|地址监听|加密货币|外汇助手|监控|汇率|^[\d\+\-\*/\.\s]+$|^@");
                 // 检查输入文本是否为数字+货币的组合
-                var isNumberCurrency = Regex.IsMatch(inputText, @"(^\d+\s*[A-Za-z\u4e00-\u9fa5]+$)|(^\d+(\.\d+)?(btc|比特币|eth|以太坊|usdt|泰达币|币安币|bnb|bgb|币记-BGB|okb|欧易-okb|ht|火币积分-HT|瑞波币|xrp|艾达币|ada|狗狗币|doge|shib|sol|莱特币|ltc|link|电报币|ton|比特现金|bch|以太经典|etc|uni|avax|门罗币|xmr)$)", RegexOptions.IgnoreCase);
+                var isNumberCurrency = Regex.IsMatch(inputText, @"^\d+(\.\d+)?\s*([A-Za-z]{3}|[\u4e00-\u9fa5]+|btc|比特币|eth|以太坊|usdt|泰达币|币安币|bnb|bgb|币记-BGB|okb|欧易-okb|ht|火币积分-HT|瑞波币|xrp|艾达币|ada|狗狗币|doge|shib|sol|莱特币|ltc|link|电报币|ton|比特现金|bch|以太经典|etc|uni|avax|门罗币|xmr)$", RegexOptions.IgnoreCase);
                 // 检查输入文本是否为纯中文文本带空格
                 var isChineseTextWithSpaces = Regex.IsMatch(inputText, @"^[\u4e00-\u9fa5\s]+$");
                 // 检查输入文本是否为 Tron 地址
