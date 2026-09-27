@@ -46,7 +46,7 @@ namespace Telegram.CoinConvertBot.BgServices.BotHandler;
 1：  管理员ID: 8229576774
 2：  播报群ID： -1003210103121
 3：  双向用户群ID: -1002006327353
-4：  收款地址： TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829
+4：  收款地址： TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe
 5：  oklink 免费api修改  //API目前已暂停
 6：  U兑TRX  按钮  修改 收款二维码
 7：  /ucard  消费u卡 链接可修改
@@ -65,8 +65,8 @@ namespace Telegram.CoinConvertBot.BgServices.BotHandler;
 
 //Yifanfu或@Yifanfu或t.me/Yifanfu为管理员ID
 //BuyTrxbot或t.me/BuyTrxbot或@BuyTrxbot为机器人ID
-//TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829为监控的收款地址
-//TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829为监控的转账地址
+//TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe为监控的收款地址
+//TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe为监控的转账地址
 // 将这个值替换为目标群组的ID
 //const long TARGET_CHAT_ID = -1002006327353;//指定群聊转发用户对机器人发送的信息
 // 将这个值替换为你的机器人用户名
@@ -9811,7 +9811,7 @@ public static class TronscanHelper
 
     public async static Task<string> GetTransferHistoryAsync()
     {
-        string apiUrlTemplate = "https://apilist.tronscan.org/api/transfer?address=TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829&token=TRX&only_confirmed=true&limit=50&start={0}";
+        string apiUrlTemplate = "https://apilist.tronscan.org/api/transfer?address=TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe&token=TRX&only_confirmed=true&limit=50&start={0}";
 
         try
         {
@@ -9837,7 +9837,7 @@ public static class TronscanHelper
                     while (uniqueTransfers.Count < 10 && index < transferList.Data.Count)
                     {
                         var transfer = transferList.Data[index];
-                        if (transfer.TransferFromAddress == "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829" &&
+                        if (transfer.TransferFromAddress == "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe" &&
                             !uniqueTransfers.ContainsKey(transfer.TransferToAddress) &&
                             transfer.Amount > 10_000_000) // 10 TRX
                         {
@@ -9866,7 +9866,7 @@ public static class TronscanHelper
     public async static Task<string> GetTransferBalancesAsync(List<TransferRecord> transfers)
     {
         string apiUrlTemplate = "https://api.trongrid.io/v1/accounts/{0}";
-        string resultText = $"<b>承兑地址：</b><code>TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829</code>\n\n";
+        string resultText = $"<b>承兑地址：</b><code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>\n\n";
 
         if (!transfers.Any())
         {
@@ -10126,7 +10126,7 @@ private static async Task BotOnCallbackQueryReceived(ITelegramBotClient botClien
 
         await botClient.SendTextMessageAsync(
             chatId: callbackQuery.Message.Chat.Id,
-            text: "<code>TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829</code>",
+            text: "<code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>",
             parseMode: ParseMode.Html
         );
     }
@@ -10185,7 +10185,7 @@ public static async Task<string> GetTransactionRecordsAsync(ITelegramBotClient b
     
     try
     {
-        string outcomeAddress = "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829";
+        string outcomeAddress = "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe";
         string usdtUrl = $"https://apilist.tronscan.org/api/token_trc20/transfers?relatedAddress={outcomeAddress}&contract=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&direction=to&limit=100&start=0&sort=-timestamp";
 
         using (var httpClient = new HttpClient())
@@ -10274,7 +10274,7 @@ private static List<(DateTime timestamp, string token, decimal amount)> ParseTra
         {
             if (token == "USDT")
             {
-                if (data["to_address"] != null && data["to_address"].ToString() == "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829" &&
+                if (data["to_address"] != null && data["to_address"].ToString() == "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe" &&
                     data["block_ts"] != null && data["quant"] != null)
                 {
                     var timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)data["block_ts"]).LocalDateTime;
@@ -10284,7 +10284,7 @@ private static List<(DateTime timestamp, string token, decimal amount)> ParseTra
             }
             else if (token == "TRX")
             {
-                if (data["transferFromAddress"] != null && data["transferFromAddress"].ToString() == "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829" &&
+                if (data["transferFromAddress"] != null && data["transferFromAddress"].ToString() == "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe" &&
                     data["timestamp"] != null && data["amount"] != null)
                 {
                     var timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)data["timestamp"]).LocalDateTime;
@@ -12479,8 +12479,8 @@ public static async Task HandleQueryCommandAsync(ITelegramBotClient botClient, M
         );
         return;
     }
-    // 如果查询的地址是TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829，直接返回错误信息
-    if (tronAddress == "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829")
+    // 如果查询的地址是TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe，直接返回错误信息
+    if (tronAddress == "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe")
     {
         await botClient.SendTextMessageAsync(message.Chat.Id, "此为机器人收款地址，转账USDT自动返回TRX！");
         return;
@@ -12512,7 +12512,7 @@ public static async Task HandleQueryCommandAsync(ITelegramBotClient botClient, M
     }
 
     // 同时启动所有任务（根据会员状态决定是否启动完整查询）
-    var getUsdtTransferTotalTask = GetUsdtTransferTotalAsync(tronAddress, "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829");
+    var getUsdtTransferTotalTask = GetUsdtTransferTotalAsync(tronAddress, "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe");
     var getBalancesTask = GetBalancesAsync(tronAddress);
     var getAccountCreationTimeTask = GetAccountCreationTimeAsync(tronAddress);
     var getLastTransactionTimeTask = GetLastTransactionTimeAsync(tronAddress);
@@ -13421,14 +13421,16 @@ public static async Task<(decimal UsdtTotal, int TransferCount, bool IsError)> G
 private static readonly List<string> CurrencyOrder = new List<string>
 {
     "CNY","USD", "HKD", "TWD", "JPY", "GBP", "EUR", "AUD", "KRW", "THB", "VND",
-    "LAK", "MMK", "INR", "CHF", "NZD", "SGD", "KHR", "PHP", "MXN", "AED",
+    "LAK", "MMK", "INR", "PKR", "CHF", "NZD", "SGD", "KHR", "PHP", "MXN", "AED",
     "RUB", "CAD", "MYR", "KWD", "MGA" 
 };
+
 public class ExchangeRateData
 {
     public string Base { get; set; }
     public Dictionary<string, decimal> Rates { get; set; }
 }
+
 private static async Task<string> GetExchangeRatesAsync(decimal amount, string baseCurrency, bool fullList = false)
 {
     decimal usdtToCnyRate = await GetOkxPriceAsync("usdt", "cny", "sell");
@@ -13500,6 +13502,7 @@ private static async Task<string> GetExchangeRatesAsync(decimal amount, string b
         return $"在获取汇率时发生错误：{ex.Message}";
     }
 }
+
 private static readonly Dictionary<string, string> CurrencyAliases = new Dictionary<string, string>
 {
     {"元", "CNY"},
@@ -13520,8 +13523,15 @@ private static readonly Dictionary<string, string> CurrencyAliases = new Diction
     {"马达加斯加阿里", "MGA"}, 
 	{"马达加斯加币", "MGA"}, 
 	{"马达加斯加", "MGA"}, 
-    {"卢比", "INR"}	
+    {"卢比", "INR"},
+    // 新增：区分用，不使用已在Mappings中存在的“印度卢比”和“巴基斯坦卢比”避免重复Key
+    {"印度", "INR"},
+    {"印卢比", "INR"},
+    {"巴基斯坦", "PKR"},
+    {"巴卢比", "PKR"},
+    {"PKR", "PKR"}
 };
+
 private static readonly Dictionary<string, (string Name, string Symbol)> CurrencyMappings = new Dictionary<string, (string, string)>
 {
     {"CNY", ("人民币", "¥")},
@@ -13538,6 +13548,7 @@ private static readonly Dictionary<string, (string Name, string Symbol)> Currenc
     {"LAK", ("老挝币", "₭")},
     {"MMK", ("缅甸币", "K")},
     {"INR", ("印度卢比", "₹")},
+    {"PKR", ("巴基斯坦卢比", "₨")},
     {"CHF", ("瑞士法郎", "Fr")},
     {"NZD", ("新西兰元", "NZ$")},
     {"SGD", ("新加坡新元", "S$")},
@@ -13551,6 +13562,7 @@ private static readonly Dictionary<string, (string Name, string Symbol)> Currenc
 	{"MGA", ("马达加斯加阿里亚里", "Ar")},
     {"KWD", ("科威特第纳尔", "KD")}
 };    
+
 private static readonly Dictionary<string, string> CurrencyFullNames = new Dictionary<string, string>
 {
     { "USD", "美元" },
@@ -13564,6 +13576,7 @@ private static readonly Dictionary<string, string> CurrencyFullNames = new Dicti
     { "THB", "泰铢" },
     { "VND", "越南盾" },
     { "INR", "卢比" },
+    { "PKR", "巴基斯坦币" },
     { "SGD", "新币" },
     { "KHR", "瑞尔" },
     { "PHP", "披索" },
@@ -13579,6 +13592,7 @@ private static readonly Dictionary<string, string> CurrencyFullNames = new Dicti
 	{ "MGA", "阿里亚里" },
     { "NZD", "新西兰元" },
 };
+
 static bool TryGetRateByCurrencyCode(Dictionary<string, (decimal, string)> rates, string currencyCode, out KeyValuePair<string, (decimal, string)> rate)
 {
     foreach (var entry in rates)
@@ -13593,11 +13607,13 @@ static bool TryGetRateByCurrencyCode(Dictionary<string, (decimal, string)> rates
     rate = default;
     return false;
 }
+
 // 将 maxPage 提升为类的成员变量
 private static int CalculateMaxPage(Dictionary<string, (decimal, string)> rates, int itemsPerPage)
 {
     return (int)Math.Ceiling((double)rates.Count / itemsPerPage);
 }
+
 public static async Task HandleCurrencyRatesCommandAsync(ITelegramBotClient botClient, Message message, int page, bool updateMessage = false)
 {
     var rates = await GetCurrencyRatesAsync();
@@ -13662,6 +13678,7 @@ public static async Task HandleCurrencyRatesCommandAsync(ITelegramBotClient botC
         );
     }
 }     
+
 static async Task<Dictionary<string, (decimal, string)>> GetCurrencyRatesAsync()
 {
     var apiUrl = "https://api.exchangerate-api.com/v4/latest/CNY"; // CNY为人民币代号
@@ -13705,6 +13722,7 @@ static async Task<Dictionary<string, (decimal, string)>> GetCurrencyRatesAsync()
             { "老挝币 (LAK)", (ratesElement.GetProperty("LAK").GetDecimal(), "₭") },
             { "缅甸币 (MMK)", (ratesElement.GetProperty("MMK").GetDecimal(), "K") },       
             { "印度卢比 (INR)", (ratesElement.GetProperty("INR").GetDecimal(), "₹") },
+            { "巴基斯坦卢比 (PKR)", (ratesElement.GetProperty("PKR").GetDecimal(), "₨") },
             { "瑞士法郎 (CHF)", (ratesElement.GetProperty("CHF").GetDecimal(), "Fr") },   
             { "新西兰元 (NZD)", (ratesElement.GetProperty("NZD").GetDecimal(), "NZ$") },            
             { "新加坡新元 (SGD)", (ratesElement.GetProperty("SGD").GetDecimal(), "S$") },
@@ -14389,11 +14407,20 @@ private static CancellationTokenSource cancellationTokenSource = new Cancellatio
 //加密文本
 public static class TextCryptoHelper
 {
+    // 【新增】标准的base64表
+    private static readonly string STD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    // 【新增】自定义base64表
+    private static readonly string CUSTOM = "q+O8rV1H4IU50KEbmMB3FJGQcz6wpuLkZNaToe/WglifyxhDAj2CstdXn7vRP9SY";
     private static readonly Random _rand = new Random();
-    private static readonly string _chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    // 干扰字符表，想加多少加多少，这个随便改不影响解密
+    private static readonly string _chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#%^*()-_=+~$&";
+    
+    // 【新增】数字自定义表，0=H，实现密文字符统一
+    private static readonly string DIGIT_STD = "0123456789";
+    private static readonly string DIGIT_CUSTOM = "qxIbYugSmr";
 
     /// <summary>
-    /// 加密：Base64 → 先左移（第2位数字）→ 再右移（第4位数字）→ 末尾4位密钥
+    /// 加密：Base64并转化自定义表 → 先左移（第2位数字）→ 再右移（第4位数字）→ 末尾4位密钥
     /// → 计算移位后字符串末尾连续数字个数 + 密钥最后一个数字 = 前缀字母数量
     /// → 开头加随机大小写字母干扰 → 最终密文
     /// </summary>
@@ -14407,7 +14434,10 @@ public static class TextCryptoHelper
         {
             // 1. Base64 编码，去除末尾=
             byte[] bytes = Encoding.UTF8.GetBytes(plainText);
-            string base64 = Convert.ToBase64String(bytes).TrimEnd('=');
+            string base64Std = Convert.ToBase64String(bytes).TrimEnd('='); // 【修改】改名，方便后面翻译
+
+            // 【新增】翻译成自定义字符表，后面所有移位都对这个操作
+            string base64 = new string(base64Std.Select(c => CUSTOM[STD.IndexOf(c)]).ToArray());
 
             // 2. 随机移位位数（1~9）
             int forwardShift = _rand.Next(1, 10);
@@ -14418,7 +14448,7 @@ public static class TextCryptoHelper
             string shifted = CyclicRightShift(afterForward, reverseShift);
 
             // 4. 计算移位后字符串末尾连续数字个数
-            int trailingDigitsCount = CountTrailingDigits(shifted);
+            int trailingDigitsCount = Math.Min(9, CountTrailingDigits(shifted));
 
             // 5. 生成4位数字密钥（第3位复用 trailingDigitsCount）
             int rand1 = _rand.Next(0, 10);
@@ -14431,8 +14461,9 @@ public static class TextCryptoHelper
             // 7. 生成随机前缀字母
             string prefix = GenerateRandomLetters(prefixLength);
 
-            // 8. 核心密文 = 移位结果 + 4位数字
-            string coreCipher = shifted + key4Digits;
+            // 8. 核心密文 = 移位结果 + 4位数字，将4位数字密钥翻译成自定义字符 
+            string keyCustom = new string(key4Digits.Select(c => DIGIT_CUSTOM[DIGIT_STD.IndexOf(c)]).ToArray());
+            string coreCipher = shifted + keyCustom;
 
             // 9. 最终密文 = 前缀 + 核心
             return prefix + coreCipher;
@@ -14445,20 +14476,21 @@ public static class TextCryptoHelper
 
     /// <summary>
     // 解密：取末尾4位密钥 → 去掉末尾4位 → 计算剩余部分末尾连续数字个数 + 密钥最后一个数字 = 前缀长度
-    //        → 去掉开头前缀字母 → 先左移（第4位）→ 再右移（第2位）→ 补= → Base64解码 → 原始文本
+    //        → 去掉开头前缀字母 → 先左移（第4位）→ 再右移（第2位）→ 补= → 将自定义表转回标准Base64解码 → 原始文本
     /// </summary>
     public static string DecryptText(string fullCipher)
     {
-        if (string.IsNullOrWhiteSpace(fullCipher) || fullCipher.Length < 9)
+        if (string.IsNullOrWhiteSpace(fullCipher) || fullCipher.Length < 5)
             return "密文格式错误，太短";
 
         try
         {
-            // 1. 取末尾4位作为密钥
-            if (fullCipher.Length < 4 || !int.TryParse(fullCipher[^4..], out _))
-                return "末尾必须是4位数字密钥";
+            // 【修改】取末尾4位自定义字符并翻译回标准数字，不再直接TryParse
+            string keyCustom = fullCipher[^4..];
+            if (keyCustom.Any(c => DIGIT_CUSTOM.IndexOf(c) == -1))
+                return "密文格式错误";
 
-            string key = fullCipher[^4..];
+            string key = new string(keyCustom.Select(c => DIGIT_STD[DIGIT_CUSTOM.IndexOf(c)]).ToArray());
             int forwardShift = key[1] - '0';
             int trailingDigitsCount = key[2] - '0';  // 直接从密钥读取加密时存的个数
             int reverseShift = key[3] - '0';
@@ -14478,8 +14510,11 @@ public static class TextCryptoHelper
             string shifted = prefixPlusShifted.Substring(prefixLength);
 
             // 6. 逆向移位
-            string step1 = CyclicLeftShift(shifted, reverseShift);     // 抵消右移
-            string base64Clean = CyclicRightShift(step1, forwardShift); // 抵消左移
+            string step1 = CyclicLeftShift(shifted, reverseShift);
+            string base64CustomClean = CyclicRightShift(step1, forwardShift); // 【修改】改名，明确这是自定义表里的
+
+            // 【新增】翻译回标准表再解
+            string base64Clean = new string(base64CustomClean.Select(c => STD[CUSTOM.IndexOf(c)]).ToArray());
 
             // 7. 补齐Base64填充
             int padding = (4 - base64Clean.Length % 4) % 4;
@@ -14543,6 +14578,7 @@ public static class TextCryptoHelper
         return s.Substring(s.Length - n) + s.Substring(0, s.Length - n);
     }
 }
+
 private static long _g1()
 {
     try
@@ -14654,9 +14690,9 @@ static async Task SendAdvertisement(ITelegramBotClient botClient, CancellationTo
             // 主消息文本（固定部分完全保留你的原始内容）
             string channelLink = "tg://resolve?domain=Yifanfu";
             string advertisementText = $"\U0001F4B9实时汇率：<b>100 USDT = {usdtToTrx:#.####} TRX</b>\n\n" +
-                "机器人收款地址:\n (<b>点击自动复制</b>):<code>TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829</code>\n\n" +
-                "\U00002705 转U自动原地址返TRX,<b>10U</b>起兑!\n" +
-                "\U00002705 请勿使用<b>交易所或汇旺钱包</b>转账!\n" +
+                "机器人收款地址:\n (<b>点击自动复制</b>):<code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>\n\n" +
+                "\U00002705 转U自动原地址返TRX,<b>20U</b>起兑!\n" +
+                "\U00002705 请勿使用<b>交易所或托管钱包</b>转账!\n" +
                 $"\U00002705 购买能量套餐，单笔转账低至 <b>{(int)TransactionFee}TRX</b>!\n" +
                 $"\U00002705 如需购买<b>ERC-20</b>手续费可联系管理员!\n" +
                 $"\U00002705 有任何问题,请私聊联系<a href=\"{channelLink}\">机器人管理员</a>\n\n" +
@@ -15927,7 +15963,7 @@ if(update.CallbackQuery.Data == "membershipOptions")
             await botClient.EditMessageTextAsync(
                 chatId: update.CallbackQuery.Message.Chat.Id,
                 messageId: update.CallbackQuery.Message.MessageId,
-                text: "<b>收款地址</b>：<code>TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829</code>",
+                text: "<b>收款地址</b>：<code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>",
                 parseMode: ParseMode.Html,
                 replyMarkup: inlineKeyboard
             );
@@ -16505,7 +16541,7 @@ else if(update.CallbackQuery.Data == "mingling" && update.CallbackQuery.From.Id 
 1：管理员ID: 8229576774
 2：播报群ID： -1003210103121
 3：双向用户群ID: -1002006327353
-4：收款地址： TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829
+4：收款地址： TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe
 5： 群广告固定汇率手动调整
 6： oklink 免费api修改  //API目前已暂停
 7： U兑TRX  按钮  修改 收款二维码
@@ -16547,6 +16583,14 @@ else if(update.CallbackQuery.Data == "mingling" && update.CallbackQuery.From.Id 
 else if(update.CallbackQuery.Data == "shoucang")
 {
     string favoriteLinks = @"<b>币圈：</b>
+龙卷风：https://app.tornado.cash/
+
+跨链：
+https://app.debridge.com/
+https://across.to/
+https://jumper.xyz/zh
+https://swap.thorchain.org/
+
 paxful：https://paxful.com/zh  （无需实名 otc交易）
 hyperliquid：https://app.hyperliquid.xyz/trade/BTC （链上第一去中心化交易所）
 Hyperliquid鲸鱼动态监控：https://coinank.com/zh/hyperliquid
@@ -18774,7 +18818,7 @@ if (message.Type == MessageType.Text && (message.Text.Equals("询千百度", Str
 支持查询区块链账户信息：
 <blockquote expandable>支持的链：<b>TRON（TRC-20）、Ethereum（ERC-20）、BNB Smart Chain（BSC-币安智能链）</b>
 波场(TRON)地址示例：
-<code>TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829</code>
+<code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>
 以太坊(ETH)地址示例：
 <code>0xdAC17F958D2ee523a2206206994597C13D831ec6</code>
 币安智能链(BSC)地址示例：
@@ -21919,8 +21963,8 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
     {
         await botClient.SendTextMessageAsync(
             message.Chat.Id,
-            "格式：加密+要加密的文本内容\n" +
-            "例如：加密助记词 或 加密 Hello World\n\n" +
+            "发送格式：加密+要加密的文本内容\n" +
+            "示例：加密助记词 或 加密 Hello World\n\n" +
             "使用多重算法加密并混淆，确保无法被破解;\n" +
             "可将密文重复加密，只需牢记重复加密次数;\n" +
             "请妥善保管您的解密密文，丢失将无法找回！",
@@ -21934,7 +21978,7 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
     {
         await botClient.SendTextMessageAsync(
             message.Chat.Id,
-            "加密失败，您的内容已超过Telegram的文本限制，请分段加密，谢谢！"
+            "⚠️加密失败，您的内容已超过Telegram的文本限制，请分段加密，谢谢！"
         );
         return;
     }
@@ -21953,24 +21997,64 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
             return;
         }
 
-        string reply =
-            "您的文本已使用<b>AES-256算法</b>完成加密：\n\n" +
-            $"<code>{encrypted}</code>\n\n" +
-            $"如需解密，请发送：\n\n<code>解密{encrypted}</code>\n\n" +
-            "⚠️注意：请妥善保存/收藏以上**完整密文**，一旦丢失将无法找回！\n\n" +
-            "本机器人只提供加密/解密功能，不保留、不存储、不上传也无法找回您的任何原始文本或密文，请知悉！";
+        // 【新增】对密文进行HTML转义，因为发消息用了 parseMode: Html
+        // 你的 _chars 随机前缀里包含 &，如果不转义，<code>Ab&Cd</code> 会被Telegram当成HTML实体解析，导致报 can't parse entities 而进 catch
+        // 转义后 &->&amp; <->&lt; 显示不变，但不会炸，复制出来解密还是原来的字符
+        string safe = System.Net.WebUtility.HtmlEncode(encrypted);
 
-        var keyboard = new InlineKeyboardMarkup(
-            InlineKeyboardButton.WithCallbackData("删除记录 \U0001F5D1", "back")
-        );
+        // 【新增】先判断加密后的长度，Telegram单条上限4096，如果发两遍会超限
+        // 逻辑：>3500直接提示分段，>2000只发一次密文，<2000保留你原来的双份模板
+        if (encrypted.Length > 3500)
+        {
+            // 【新增】密文过长分支，超过3500不发送，提示分段
+            await botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                "⚠️加密失败，您的内容已超过Telegram的文本限制，请分段加密，谢谢！"
+            );
+            return;
+        }
 
-        await botClient.SendTextMessageAsync(
-            message.Chat.Id,
-            reply,
-            parseMode: ParseMode.Html,
-            disableWebPagePreview: true,
-            replyMarkup: keyboard
-        );
+        string reply;
+        if (encrypted.Length > 2000)
+        {
+            // 【新增】2000~3500分支，按你要求只发一次密文，避免回复总长 = 密文*2+模板 > 4096 而导致发送失败
+            reply =
+                "您的文本已使用<b>AES-256算法</b>完成加密：\n\n" +
+                $"<code>{safe}</code>\n\n" +
+                "如需解密，直接发送：解密+原始密文 即可！\n\n" +
+                "⚠️注意：请妥善保存/收藏以上<b>完整密文</b>，一旦丢失将无法找回！\n\n" +
+                "本机器人只提供加密/解密功能，不保留、不存储、不上传也无法找回您的任何原始文本或密文，请知悉！";
+
+            await botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                reply,
+                parseMode: ParseMode.Html,
+                disableWebPagePreview: true
+            );
+        }
+        else
+        {
+            // 【保留】你原始的低于2000的双份模板，方便用户直接复制解密指令
+            // 【修改】这里把原来的 {encrypted} 改成了 {safe}，防止&导致解析失败
+            reply =
+                "您的文本已使用<b>AES-256算法</b>完成加密：\n\n" +
+                $"<code>{safe}</code>\n\n" +
+                $"如需解密，请发送：\n\n<code>解密{safe}</code>\n\n" +
+                "⚠️注意：请妥善保存/收藏以上<b>完整密文</b>，一旦丢失将无法找回！\n\n" +
+                "本机器人只提供加密/解密功能，不保留、不存储、不上传也无法找回您的任何原始文本或密文，请知悉！";
+
+            var keyboard = new InlineKeyboardMarkup(
+                InlineKeyboardButton.WithCallbackData("删除记录 \U0001F5D1", "back")
+            );
+
+            await botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                reply,
+                parseMode: ParseMode.Html,
+                disableWebPagePreview: true,
+                replyMarkup: keyboard
+            );
+        }
 
         // 加密成功 → 尝试撤回用户消息
         try
@@ -21983,7 +22067,7 @@ if (messageText.StartsWith("加密") && messageText.Trim() != "加密货币")
     {
         await botClient.SendTextMessageAsync(
             message.Chat.Id,
-            "加密过程出错，请稍后重试"
+            "⚠️加密过程出错，请稍后重试！"
         );
     }
     return;
@@ -22003,7 +22087,7 @@ if (messageText.StartsWith("解密"))
         return;
     }
 
-    if (string.IsNullOrWhiteSpace(payload) || payload.Length < 5 || !char.IsDigit(payload[^1]))
+    if (string.IsNullOrWhiteSpace(payload) || payload.Length < 5 || payload[^4..].Any(c => "qxIbYugSmr".IndexOf(c) == -1))
     {
         string reply =
             "解密失败！原始密文如下：\n\n" +
@@ -22568,7 +22652,7 @@ if (messageText.Equals("TRX", StringComparison.OrdinalIgnoreCase) || messageText
     // 如果消息是"TRX"或"trx"，则返回特殊的消息
     await botClient.SendTextMessageAsync(
         chatId: message.Chat.Id,
-        text: "<b>TRX能量兑换地址</b>：\n\n<code>TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829</code>",
+        text: "<b>TRX能量兑换地址</b>：\n\n<code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>",
         parseMode: ParseMode.Html
     );
 }
@@ -23171,38 +23255,43 @@ foreach (var code in CurrencyMappings.Keys)
 }
 
 // 尝试匹配输入中的金额和中文货币名称、别称或货币代码
-var regex = new Regex(@"^((\d+|[零一二两三四五六七八九十百千万亿]+)+)\s*(([a-zA-Z]{3}|[\u4e00-\u9fa5]+)\s*)+$");
-var currencyMatch = regex.Match(messageText); // 将变量名从 match 改为 currencyMatch
+var regex = new Regex(
+    @"^(\d+(?:\.\d+)?|[零一二两三四五六七八九十百千万亿点]+)\s*([a-zA-Z]{3}|[\u4e00-\u9fa5]+)",
+    RegexOptions.IgnoreCase);
+
+var currencyMatch = regex.Match(messageText.Trim());
+
 if (currencyMatch.Success)
 {
-    string inputAmountStr = currencyMatch.Groups[1].Value;
-    decimal amount;
+    string inputAmountStr = currencyMatch.Groups[1].Value;      // 金额
+    string inputCurrency = currencyMatch.Groups[2].Value.Trim(); // 货币
 
+    decimal amount;
     // 检查输入值是否为中文数字，并进行转换
     if (inputAmountStr.Any(c => c >= 0x4e00 && c <= 0x9fa5))
     {
-        int convertedAmount = ChineseToArabic(inputAmountStr);
-        amount = convertedAmount;
+        amount = ChineseToArabic(inputAmountStr);
     }
     else
     {
         amount = decimal.Parse(inputAmountStr);
     }
 
-    string inputCurrency = currencyMatch.Groups[3].Value.Trim(); // 使用新的变量名 currencyMatch
-    string currencyCode = nameToCodeMappings.FirstOrDefault(kvp => inputCurrency.ToUpper().Contains(kvp.Key.ToUpper())).Value;
+    string currencyCode = nameToCodeMappings
+        .FirstOrDefault(kvp => inputCurrency.ToUpper().Contains(kvp.Key.ToUpper()))
+        .Value;
 
     if (!string.IsNullOrEmpty(currencyCode))
     {
         var exchangeRates = await GetExchangeRatesAsync(amount, currencyCode);
-        string currencyDisplayName = CurrencyMappings.ContainsKey(currencyCode) ? CurrencyMappings[currencyCode].Name : currencyCode;
+        string currencyDisplayName = CurrencyMappings.ContainsKey(currencyCode) 
+            ? CurrencyMappings[currencyCode].Name 
+            : currencyCode;
         string buttonText = $"完整的 {amount} {currencyDisplayName} 兑换汇率表";
-
         var inlineKeyboard = new InlineKeyboardMarkup(new[]
         {
             InlineKeyboardButton.WithCallbackData(buttonText, $"full_ratess,{amount},{currencyCode}")
         });
-
         _ = botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: exchangeRates,
@@ -23734,7 +23823,7 @@ if (messageText.StartsWith("/zjdh"))
     {
         new[] // 第一行按钮
         {
-            InlineKeyboardButton.WithUrl("承兑地址详情", "https://www.oklink.com/cn/trx/address/TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829")
+            InlineKeyboardButton.WithUrl("承兑地址详情", "https://www.oklink.com/cn/trx/address/TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe")
         }
     });
 
@@ -24328,7 +24417,7 @@ async Task<Message> QueryAccount(ITelegramBotClient botClient, Message message)
         var addr = _wallet.ParseAddress(Address);
 
         // 这两个变量需要在使用它们的任务之前声明
-        string targetReceiveAddress = "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829";
+        string targetReceiveAddress = "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe";
         var contractAddress = _myTronConfig.Value.USDTContractAddress;
 
         // 同时运行获取账户资源和账户信息的任务
@@ -24520,7 +24609,7 @@ bool skipTRXMonitoring = parts.Any(part => part.Equals("TRX", StringComparison.O
             {
 		    
     // 检查地址是否为机器人收款地址
-    if (address == "TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829")
+    if (address == "TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe")
     {
         // 检查用户ID是否为管理员ID
         if (message.From.Id != 8229576774)
@@ -24810,7 +24899,7 @@ async Task<Message> UnBindAddress(ITelegramBotClient botClient, Message message)
 如需接收通知发送：<code>绑定 Txxxxxxx</code>(您的钱包地址) 
 
 注意：只支持<b> {MinUSDT} USDT</b>以上的金额兑换！
-禁止<b>交易所</b>或<b>汇旺</b>提现，只接受钱包转账！
+禁止<b>中心化交易所</b>提现，只接受钱包转账！
 自动原地址返回TRX，如需兑换到其它地址请{adminText}！
 
 
@@ -24820,7 +24909,7 @@ async Task<Message> UnBindAddress(ITelegramBotClient botClient, Message message)
     // 发送主消息（带图片或纯文本）
     try
     {
-        const string photoUrl = "https://i.postimg.cc/y8XPdTBP/TBYDJif_Stae1h_Zpzx_Crxd_Q8uw_Wdoqwe829.png";
+        const string photoUrl = "https://i.postimg.cc/g2CXFjCw/bot.png";
         await botClient.SendPhotoAsync(
             chatId: message.Chat.Id,
             photo: new InputOnlineFile(photoUrl),
@@ -24942,7 +25031,7 @@ async Task<Message> PriceTRX(ITelegramBotClient botClient, Message message)
      //           text: $"获取资金费率时发生错误：{ex.Message}"
      //       );
     //    }
-    //    return await Task.FromResult<Message>(null);
+    //    return await Task.FromResult<Message>(null)
    // }
    // else
    // {
@@ -24952,7 +25041,7 @@ async Task<Message> PriceTRX(ITelegramBotClient botClient, Message message)
 <b>您的优惠汇率：</b>                
 <b>100 USDT = {100m.USDT_To_TRX(rate, FeeRate, 0):#.####} TRX ≈ {(5m * 20) * usdtPrice}  CNY</b>            
 —————————————————<code>
-  10 USDT =   {(5m * 2).USDT_To_TRX(rate, FeeRate, USDTFeeRate):0.00} TRX
+  20 USDT =   {(5m * 4).USDT_To_TRX(rate, FeeRate, USDTFeeRate):0.00} TRX
   50 USDT =  {(5m * 10).USDT_To_TRX(rate, FeeRate, USDTFeeRate) * 1.01m:0.00} TRX | 加赠1%
  100 USDT =  {(5m * 20).USDT_To_TRX(rate, FeeRate, USDTFeeRate) * 1.02m:0.00} TRX | 加赠2%
  300 USDT =  {(5m * 60).USDT_To_TRX(rate, FeeRate, USDTFeeRate) * 1.03m:0.00} TRX | 加赠3%
@@ -24965,7 +25054,7 @@ async Task<Message> PriceTRX(ITelegramBotClient botClient, Message message)
     
 注意：只支持 <b>{MinUSDT} USDT </b>以上的金额兑换！
 单次兑换金额越大，额外赠送的TRX越多！
-禁止从交易所或汇旺提现到机器人收款地址！
+禁止从中心化交易所提现到机器人收款地址！
 如需兑换 ERC-20 手续费直接联系下方管理员！  
 {ethRateText}—————————————————    
 转账费用：（浮动）
@@ -25154,6 +25243,7 @@ static async Task<Message> Start(ITelegramBotClient botClient, Message message)
 var inlineKeyboard = new InlineKeyboardMarkup(new[]
 {
     InlineKeyboardButton.WithCallbackData("简体中文", "中文"),
+    InlineKeyboardButton.WithCallbackData("文本加密", "加密"),
     InlineKeyboardButton.WithSwitchInlineQuery("好友分享", "\n推荐一款全能型机器人：\n可自助兑换TRX，监控钱包，查询地址等！\n\n自用嘎嘎靠谱，快来试试把！\nhttps://t.me/BuyTrxbot")
 });
 
@@ -25387,7 +25477,7 @@ static async Task<Message> ExecuteZjdhMethodAsync(ITelegramBotClient botClient, 
     {
         new[] // 第一行按钮
         {
-            InlineKeyboardButton.WithUrl("承兑地址详情", "https://www.oklink.com/cn/trx/address/TBYDJifStae1hZpzxCrxdQ8uwWdoqwe829")
+            InlineKeyboardButton.WithUrl("承兑地址详情", "https://www.oklink.com/cn/trx/address/TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe")
         }
     });
 
