@@ -23255,38 +23255,43 @@ foreach (var code in CurrencyMappings.Keys)
 }
 
 // 尝试匹配输入中的金额和中文货币名称、别称或货币代码
-var regex = new Regex(@"^((\d+|[零一二两三四五六七八九十百千万亿]+)+)\s*(([a-zA-Z]{3}|[\u4e00-\u9fa5]+)\s*)+$");
-var currencyMatch = regex.Match(messageText); // 将变量名从 match 改为 currencyMatch
+var regex = new Regex(
+    @"^(\d+(?:\.\d+)?|[零一二两三四五六七八九十百千万亿点]+)\s*([a-zA-Z]{3}|[\u4e00-\u9fa5]+)",
+    RegexOptions.IgnoreCase);
+
+var currencyMatch = regex.Match(messageText.Trim());
+
 if (currencyMatch.Success)
 {
-    string inputAmountStr = currencyMatch.Groups[1].Value;
-    decimal amount;
+    string inputAmountStr = currencyMatch.Groups[1].Value;      // 金额
+    string inputCurrency = currencyMatch.Groups[2].Value.Trim(); // 货币
 
+    decimal amount;
     // 检查输入值是否为中文数字，并进行转换
     if (inputAmountStr.Any(c => c >= 0x4e00 && c <= 0x9fa5))
     {
-        int convertedAmount = ChineseToArabic(inputAmountStr);
-        amount = convertedAmount;
+        amount = ChineseToArabic(inputAmountStr);
     }
     else
     {
         amount = decimal.Parse(inputAmountStr);
     }
 
-    string inputCurrency = currencyMatch.Groups[3].Value.Trim(); // 使用新的变量名 currencyMatch
-    string currencyCode = nameToCodeMappings.FirstOrDefault(kvp => inputCurrency.ToUpper().Contains(kvp.Key.ToUpper())).Value;
+    string currencyCode = nameToCodeMappings
+        .FirstOrDefault(kvp => inputCurrency.ToUpper().Contains(kvp.Key.ToUpper()))
+        .Value;
 
     if (!string.IsNullOrEmpty(currencyCode))
     {
         var exchangeRates = await GetExchangeRatesAsync(amount, currencyCode);
-        string currencyDisplayName = CurrencyMappings.ContainsKey(currencyCode) ? CurrencyMappings[currencyCode].Name : currencyCode;
+        string currencyDisplayName = CurrencyMappings.ContainsKey(currencyCode) 
+            ? CurrencyMappings[currencyCode].Name 
+            : currencyCode;
         string buttonText = $"完整的 {amount} {currencyDisplayName} 兑换汇率表";
-
         var inlineKeyboard = new InlineKeyboardMarkup(new[]
         {
             InlineKeyboardButton.WithCallbackData(buttonText, $"full_ratess,{amount},{currencyCode}")
         });
-
         _ = botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: exchangeRates,
