@@ -10347,40 +10347,67 @@ public static class TranslationSettingsManager
     {
         TranslationSettings[id] = isEnabled;
     }
-} 
+}
 public class GoogleTranslateFree
 {
-    private const string GoogleTranslateUrl = "https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl={0}&dt=t&q={1}";
+    // 两条备用接口
+    private static readonly string[] TranslateUrls = new[]
+    {
+        "https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl={0}&dt=t&q={1}",
+        "https://translate.googleapis.com/translate_a/single?client=at&sl=auto&tl={0}&dt=t&q={1}"
+    };
 
     public static async Task<(string TranslatedText, string Pronunciation, bool IsError)> TranslateAsync(string text, string targetLanguage)
     {
         using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        httpClient.Timeout = TimeSpan.FromSeconds(8);
 
-        HttpResponseMessage response;
-        try
+        foreach (var urlTemplate in TranslateUrls)
         {
-            var url = string.Format(GoogleTranslateUrl, Uri.EscapeDataString(targetLanguage), Uri.EscapeDataString(text));
-            response = await httpClient.GetAsync(url);
+            try
+            {
+                var url = string.Format(urlTemplate, Uri.EscapeDataString(targetLanguage), Uri.EscapeDataString(text));
+                var response = await httpClient.GetAsync(url);
+                var json = await response.Content.ReadAsStringAsync();
+
+                // 如果返回的是 HTML 或空内容，尝试下一条
+                if (string.IsNullOrWhiteSpace(json) || json.TrimStart().StartsWith("<"))
+                {
+                    Console.WriteLine($"[翻译] 接口返回非 JSON，状态码: {response.StatusCode}，尝试下一条...");
+                    continue;
+                }
+
+                // 尝试解析 JSON
+                var jsonArray = JsonSerializer.Deserialize<JsonElement>(json);
+
+                var translatedTextBuilder = new StringBuilder();
+                foreach (var segment in jsonArray[0].EnumerateArray())
+                {
+                    translatedTextBuilder.Append(segment[0].ToString());
+                }
+
+                var translatedText = translatedTextBuilder.ToString();
+                string pronunciation = string.Empty;
+                try
+                {
+                    pronunciation = jsonArray[0][0][1].ToString();
+                }
+                catch { }
+
+                // 成功拿到结果，直接返回
+                return (translatedText, pronunciation, false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[翻译] 当前接口异常: {ex.Message}，尝试下一条...");
+                // 继续尝试下一条接口
+            }
         }
-        catch (Exception)
-        {
-            return (string.Empty, string.Empty, true);
-        }
 
-        var json = await response.Content.ReadAsStringAsync();
-
-        var jsonArray = JsonSerializer.Deserialize<JsonElement>(json);
-
-        var translatedTextBuilder = new StringBuilder();
-        foreach (var segment in jsonArray[0].EnumerateArray())
-        {
-            translatedTextBuilder.Append(segment[0].ToString());
-        }
-
-        var translatedText = translatedTextBuilder.ToString();
-        var pronunciation = jsonArray[0][0][1].ToString();
-
-        return (translatedText, pronunciation, false);
+        // 两条接口都失败了
+        Console.WriteLine("[翻译] 所有接口均失败");
+        return (string.Empty, string.Empty, true);
     }
 
     public static string GetPronunciationAudioUrl(string text, string languageCode)
@@ -10390,7 +10417,6 @@ public class GoogleTranslateFree
         return audioUrl;
     }
 }
-
 private static async Task HandleTranslateCommandAsync(ITelegramBotClient botClient, Message message)
 {
     // 修改正则表达式以匹配多行文本
@@ -13436,6 +13462,49 @@ private static readonly Dictionary<string, (ExchangeRateData Data, DateTime Fetc
 private static readonly object WaihuiCacheLock = new object();
 private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(23); // 缓存有效期 23 小时
 
+/// <summary>
+/// 解析纯数字、纯中文、或 数字+中文单位（如 1万、1.5万、10千）的金额
+/// </summary>
+private static decimal ParseChineseOrMixedAmount(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return 0;
+
+    // 1. 纯阿拉伯数字
+    if (decimal.TryParse(input, out decimal pureNumber))
+        return pureNumber;
+
+    // 2. 纯中文数字（走原来的 ChineseToArabic）
+    if (input.All(c => (c >= 0x4e00 && c <= 0x9fa5) || c == '点'))
+        return ChineseToArabic(input);
+
+    // 3. 混合格式：数字 + 中文单位（万/千/亿 等）
+    // 匹配例如：1万、10.5万、2千、3亿、1.2百万 等
+    var mixedMatch = Regex.Match(input, @"^(\d+(?:\.\d+)?)([万千亿百]+)$");
+    if (mixedMatch.Success)
+    {
+        decimal number = decimal.Parse(mixedMatch.Groups[1].Value);
+        string unit = mixedMatch.Groups[2].Value;
+
+        // 简单单位映射（按从大到小处理）
+        if (unit.Contains("亿")) number *= 100_000_000m;
+        if (unit.Contains("万")) number *= 10_000m;
+        if (unit.Contains("千")) number *= 1_000m;
+        if (unit.Contains("百")) number *= 100m;
+
+        return number;
+    }
+
+    // 兜底：尝试直接用 ChineseToArabic（防止漏掉的情况）
+    try
+    {
+        return ChineseToArabic(input);
+    }
+    catch
+    {
+        return 0;
+    }
+}
 private static async Task<string> GetExchangeRatesAsync(decimal amount, string baseCurrency, bool fullList = false)
 {
     decimal usdtToCnyRate = await GetOkxPriceAsync("usdt", "cny", "sell");
@@ -14098,10 +14167,25 @@ static async Task<(decimal[], decimal[])> GetCryptoPricesAsync(string[] symbols,
         return (new decimal[0], new decimal[0]); // 当发生异常时，返回空数组
     }
 }
+// USDT/CNY 价格缓存（最多保留1条）okx 欧易
+private static decimal? _okxPriceCache = null;
+private static DateTime _okxPriceCacheTime = DateTime.MinValue;
+private static readonly object OkxPriceCacheLock = new object();
+private static readonly TimeSpan OkxPriceCacheDuration = TimeSpan.FromMinutes(10); // 缓存 10 分钟
+
 public static async Task<decimal> GetOkxPriceAsync(string baseCurrency, string quoteCurrency, string method)
 {
-    var client = new HttpClient();
+    // ========== 优先读取缓存 ==========
+    lock (OkxPriceCacheLock)
+    {
+        if (_okxPriceCache.HasValue && DateTime.Now - _okxPriceCacheTime < OkxPriceCacheDuration)
+        {
+            return _okxPriceCache.Value; // 缓存有效，直接返回
+        }
+    }
 
+    // ========== 缓存不存在或已过期，请求 API ==========
+    var client = new HttpClient();
     var url = $"https://www.okx.com/v3/c2c/tradingOrders/books?quoteCurrency={quoteCurrency}&baseCurrency={baseCurrency}&side=sell&paymentMethod={method}&userType=blockTrade&showTrade=false&receivingAds=false&showFollow=false&showAlreadyTraded=false&isAbleFilter=false&urlId=2";
 
     HttpResponseMessage response;
@@ -14109,10 +14193,10 @@ public static async Task<decimal> GetOkxPriceAsync(string baseCurrency, string q
     {
         response = await client.GetAsync(url);
     }
-    catch (Exception ex) // 修改了这里
+    catch (Exception ex)
     {
-        Console.WriteLine($"API异常，暂无法访问。错误信息：{ex.Message}"); // 修改了这里
-        return default; // 返回默认值（0）
+        Console.WriteLine($"API异常，暂无法访问。错误信息：{ex.Message}");
+        return default;
     }
 
     if (response.IsSuccessStatusCode)
@@ -14121,31 +14205,37 @@ public static async Task<decimal> GetOkxPriceAsync(string baseCurrency, string q
         {
             var jsonString = await response.Content.ReadAsStringAsync();
             var doc = JsonDocument.Parse(jsonString);
-
             if (doc.RootElement.TryGetProperty("data", out var data) && data.TryGetProperty("sell", out var sell))
             {
                 var sellArray = sell.EnumerateArray();
-
                 if (sellArray.MoveNext())
                 {
                     var firstElement = sellArray.Current;
-
                     if (firstElement.TryGetProperty("price", out var price))
                     {
-                        return decimal.Parse(price.GetString());
+                        decimal result = decimal.Parse(price.GetString());
+
+                        // ========== 写入/覆盖缓存 ==========
+                        lock (OkxPriceCacheLock)
+                        {
+                            _okxPriceCache = result;
+                            _okxPriceCacheTime = DateTime.Now;
+                        }
+
+                        return result;
                     }
                 }
             }
         }
-        catch (Exception ex) // 修改了这里
+        catch (Exception ex)
         {
-            Console.WriteLine($"获取价格数据异常。错误信息：{ex.Message}"); // 修改了这里
-            return default; // 返回默认值（0）
+            Console.WriteLine($"获取价格数据异常。错误信息：{ex.Message}");
+            return default;
         }
     }
 
     Console.WriteLine("无法从OKX API获取价格。");
-    return default; // 返回默认值（0）
+    return default;
 }
 //合约助手
 static async Task SendAdvertisementOnce(ITelegramBotClient botClient, CancellationToken cancellationToken, IBaseRepository<TokenRate> rateRepository, decimal FeeRate, long chatId)
@@ -23287,29 +23377,29 @@ foreach (var code in CurrencyMappings.Keys)
         nameToCodeMappings[code] = code;
     }
 }
-
 // 尝试匹配输入中的金额和中文货币名称、别称或货币代码
+// 支持：纯数字、纯中文数字、数字+中文单位（如 1万、1.5万、10千）
+// 金额部分必须有内容，避免误匹配普通英文单词（如 hello）
 var regex = new Regex(
-    @"^(\d+(?:\.\d+)?|[零一二两三四五六七八九十百千万亿点]+)\s*([a-zA-Z]{3}|[\u4e00-\u9fa5]+)",
+    @"^(\d+(?:\.\d+)?[零一二两三四五六七八九十百千万亿点]*|[零一二两三四五六七八九十百千万亿点]+)\s*([a-zA-Z]{3}|[\u4e00-\u9fa5]+)$",
     RegexOptions.IgnoreCase);
 
 var currencyMatch = regex.Match(messageText.Trim());
-
 if (currencyMatch.Success)
 {
-    string inputAmountStr = currencyMatch.Groups[1].Value;      // 金额
-    string inputCurrency = currencyMatch.Groups[2].Value.Trim(); // 货币
+    string inputAmountStr = currencyMatch.Groups[1].Value.Trim();   // 金额
+    string inputCurrency = currencyMatch.Groups[2].Value.Trim();    // 货币
 
-    decimal amount;
-    // 检查输入值是否为中文数字，并进行转换
-    if (inputAmountStr.Any(c => c >= 0x4e00 && c <= 0x9fa5))
-    {
-        amount = ChineseToArabic(inputAmountStr);
-    }
-    else
-    {
-        amount = decimal.Parse(inputAmountStr);
-    }
+    // 金额为空直接跳过（防止误匹配）
+    if (string.IsNullOrWhiteSpace(inputAmountStr))
+        return;
+
+    // 统一解析金额（支持纯数字、纯中文、混合格式）
+    decimal amount = ParseChineseOrMixedAmount(inputAmountStr);
+
+    // 金额解析失败则跳过
+    if (amount <= 0)
+        return;
 
     string currencyCode = nameToCodeMappings
         .FirstOrDefault(kvp => inputCurrency.ToUpper().Contains(kvp.Key.ToUpper()))
@@ -23318,19 +23408,21 @@ if (currencyMatch.Success)
     if (!string.IsNullOrEmpty(currencyCode))
     {
         var exchangeRates = await GetExchangeRatesAsync(amount, currencyCode);
-        string currencyDisplayName = CurrencyMappings.ContainsKey(currencyCode) 
-            ? CurrencyMappings[currencyCode].Name 
+        string currencyDisplayName = CurrencyMappings.ContainsKey(currencyCode)
+            ? CurrencyMappings[currencyCode].Name
             : currencyCode;
+
         string buttonText = $"完整的 {amount} {currencyDisplayName} 兑换汇率表";
         var inlineKeyboard = new InlineKeyboardMarkup(new[]
         {
             InlineKeyboardButton.WithCallbackData(buttonText, $"full_ratess,{amount},{currencyCode}")
         });
+
         _ = botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: exchangeRates,
             parseMode: ParseMode.Html,
-            replyMarkup: inlineKeyboard // 添加内联键盘
+            replyMarkup: inlineKeyboard
         );
     }
 }
