@@ -44,8 +44,8 @@ namespace Telegram.CoinConvertBot.BgServices.BotHandler;
 //备忘录
 0：频道链接更改
 1：  管理员ID: 8992100332
-2：  播报群ID： -1003921428196
-3：  双向用户群ID: -1003984906700
+2：  播报群ID： -1003921428196   （有时候批量替换会失败，把 -去掉）
+3：  双向用户群ID: -1003984906700  （有时候批量替换会失败，把 -去掉）
 4：  收款地址： TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe
 5：  oklink 免费api修改  //API目前已暂停
 6：  U兑TRX  按钮  修改 收款二维码
@@ -16815,7 +16815,7 @@ api大全：https://www.apispace.com/#/api/detail/?productID=89
 韩小韩接口：https://api.vvhan.com/
 大象工具：https://www.sunzhongwei.com/go/tools
 文字生成图片：https://remeins.com/index/app/text2img
-base64编码转换：https://remeins.com/index/app/text2img
+base64编码转换：https://www.base64encode.org/zh/
 vpn：https://github.com/mack-a/v2ray-agent?tab=readme-ov-file
 能量租赁：https://tronenergy.market/
 能量租赁合集：https://tronrelic.com/resource-markets/q3302198563livegoon
@@ -17042,7 +17042,7 @@ if (message.Chat.Id < 0) // 群聊或超级群聊的ID为负数
             //Log.Information($"新增群聊信息，群ID：{chat.Id}, 群名：{chat.Title}, 邀请链接：{inviteLink ?? "无"}");
 
             // 自动将群ID添加到广告仓库，但排除指定的固定群ID
-            if (chat.Id != -1003223313822)
+            if (chat.Id != -1003984906700)
             {
                 GroupManager.AddGroupId(chat.Id);
                 //Log.Information($"已将群ID {chat.Id} 添加到广告仓库");
