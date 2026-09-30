@@ -56,14 +56,14 @@ namespace Telegram.CoinConvertBot.BgServices.BotHandler;
 11： 波场官网api修改：  369e85e5-68d3-4299-a602-9d8d93ad026a   0c138945-fd9f-4390-b015-6b93368de1fd   https://tronscan.org/#/myaccount/apiKeys  都是免费的api，随便注册即可
 12：  以太坊api： WR9Z9H4MRK5CP8817WF4RDAI15PGRI2WV4   DIPNHXE6J4IA1NS57ZFYRGRMSWVVCM9GXI    https://etherscan.io/apidashboard   都是免费的api，随便注册即可
 13： 防盗版授权
-14： 替换管理员链接： t.me/YIfanfu1 或 @YIfanfu1
+14： 替换管理员链接： t.me/Yifanfu 或 @Yifanfu
 15： 替换机器人链接： t.me/BuyTrxbot 或 @BuyTrxbot
 16： 会员价格如有需要也可以修改
 17：// 定义API密钥   private static readonly string[] ApiKeys = new[]   监听USDT 秘钥需修改，随便注册  https://www.trongrid.io/dashboard
 18：修改配置文件里的appsettings.json  波场 www.trongrid.io 秘钥尽量不要和监听USDT的秘钥相同
 */
 
-//YIfanfu1或@YIfanfu1或t.me/YIfanfu1为管理员ID
+//Yifanfu或@Yifanfu或t.me/Yifanfu为管理员ID
 //BuyTrxbot或t.me/BuyTrxbot或@BuyTrxbot为机器人ID
 //TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe为监控的收款地址
 //TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe为监控的转账地址
@@ -77,7 +77,7 @@ namespace Telegram.CoinConvertBot.BgServices.BotHandler;
 //const long TARGET_CHAT_ID = -1003984906700;//指定群聊转发用户对机器人发送的信息
 //    await botClient.SendTextMessageAsync(
 //        chatId: -1003984906700, // 群聊ID   用户点击按钮 自动在指定群聊 艾特作者 已取消！！！！！
-//        text: $"@YIfanfu1 有人需要帮助，用户名： @{update.CallbackQuery.From.Username} 用户ID：{update.CallbackQuery.From.Id}"
+//        text: $"@Yifanfu 有人需要帮助，用户名： @{update.CallbackQuery.From.Username} 用户ID：{update.CallbackQuery.From.Id}"
 //    );
 //    static GroupManager()  广告发到指定群聊
 //    {
@@ -1613,7 +1613,7 @@ if (fromUser != null)
     captionText.AppendLine($"  BNB余额：<b>{bnbBalance:N4} BNB</b>{(bnbCnyValue > 0 ? $" ≈ <b>{bnbCnyValue:N2}元人民币</b>" : "")}");
     captionText.AppendLine($"USDT余额：<b>{usdtBalanceBsc:N2} USDT</b>{(usdtBalanceBsc > 0 ? $" ≈ <b>{cnyUsdtBalanceBsc:N2}元人民币</b>" : "")}");
     captionText.AppendLine($"USDC余额：<b>{usdcBalanceBsc:N2} USDC</b>{(usdcBalanceBsc > 0 ? $" ≈ <b>{cnyUsdcBalanceBsc:N2}元人民币</b>" : "")}");
-    captionText.AppendLine($"\n<a href=\"t.me/YIfanfu1\">代开会员 | TRX兑换 | 点击购买：\nTRC-20、ERC-20、BEP-20 能量！ </a>");
+    captionText.AppendLine($"\n<a href=\"t.me/Yifanfu\">代开会员 | TRX兑换 | 点击购买：\nTRC-20、ERC-20、BEP-20 能量！ </a>");
 
     var shareLink = "https://t.me/BuyTrxbot?startgroup=true";
     var inlineKeyboard = new InlineKeyboardMarkup(new[]
@@ -3099,7 +3099,7 @@ else
     var inlineKeyboard = new InlineKeyboardMarkup(new[]
     {
         // 创建两个按钮：直接联系作者和由作者联系您
-        InlineKeyboardButton.WithUrl("直接联系作者", "https://t.me/YIfanfu1"),
+        InlineKeyboardButton.WithUrl("直接联系作者", "https://t.me/Yifanfu"),
         InlineKeyboardButton.WithCallbackData("由作者联系您", "authorContactRequest")
     });
 
@@ -10135,7 +10135,7 @@ private static async Task SendHelpMessageAsync(ITelegramBotClient botClient, Mes
 {
     if (message.Text.Contains("帮助") || message.Text.StartsWith("/help"))
     {
-        string adminLink = "https://t.me/YIfanfu1";
+        string adminLink = "https://t.me/Yifanfu";
         string adminLinkText = $"<a href=\"{adminLink}\">管理员！</a>";
 
         string helpText = "更改电报语言：在机器人对话框直接发送：<code>中文</code> 自动返回包括原zh_cn等众多简体中文语言包，点击任意链接即可更改界面语言！\n\n" +
@@ -14812,7 +14812,7 @@ static async Task SendAdvertisement(ITelegramBotClient botClient, CancellationTo
                 : "";
 
             // 主消息文本（固定部分完全保留你的原始内容）
-            string channelLink = "tg://resolve?domain=YIfanfu1";
+            string channelLink = "tg://resolve?domain=Yifanfu";
             string advertisementText = $"\U0001F4B9实时汇率：<b>100 USDT = {usdtToTrx:#.####} TRX</b>\n\n" +
                 "机器人收款地址:\n (<b>点击自动复制</b>):<code>TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe</code>\n\n" +
                 "\U00002705 转U自动原地址返TRX,<b>20U</b>起兑!\n" +
@@ -14832,7 +14832,7 @@ static async Task SendAdvertisement(ITelegramBotClient botClient, CancellationTo
             string shareLink = $"https://t.me/{botUsername}?startgroup=";
             var inlineKeyboard = new InlineKeyboardMarkup(new[]
             {
-                new[] { InlineKeyboardButton.WithCallbackData("能量详情", "能量"), InlineKeyboardButton.WithUrl("开通会员", "https://t.me/YIfanfu1") },
+                new[] { InlineKeyboardButton.WithCallbackData("能量详情", "能量"), InlineKeyboardButton.WithUrl("开通会员", "https://t.me/Yifanfu") },
                 new[] { InlineKeyboardButton.WithUrl("私聊使用", "https://t.me/BuyTrxbot"), InlineKeyboardButton.WithUrl("群聊使用", shareLink) }
             });
 
@@ -16079,7 +16079,7 @@ if(update.CallbackQuery.Data == "membershipOptions")
             {
                 new [] // 第一行按钮
                 {
-                    InlineKeyboardButton.WithUrl("支付成功", "https://t.me/YIfanfu1"),
+                    InlineKeyboardButton.WithUrl("支付成功", "https://t.me/Yifanfu"),
                     InlineKeyboardButton.WithCallbackData("重新选择", "cancelPayment"),
                 }
             });
@@ -16539,21 +16539,21 @@ else if(update.CallbackQuery.Data == "memberEmojis")
         chatId: update.CallbackQuery.Message.Chat.Id,
         text: @"热门会员emoji表情包，点击链接即可添加：
 	
-1：热门：https://t.me/addemoji/YIfanfu1
-2：热门：https://t.me/addemoji/YIfanfu1TGvip
-3：财神：https://t.me/addemoji/YIfanfu1facai
-4：闪字：https://t.me/addemoji/YIfanfu1shanzi
-5：熊猫：https://t.me/addemoji/YIfanfu1panda
-6：东南亚：https://t.me/addemoji/YIfanfu1DNY
-7：米老鼠：https://t.me/addemoji/YIfanfu1milaoshu
-8：龙年特辑：https://t.me/addemoji/YIfanfu12024
-9：蛇年特辑：https://t.me/addemoji/YIfanfu1shenian
-10：币圈专用：https://t.me/addemoji/YIfanfu1btc
-11：车队专用：https://t.me/addemoji/YIfanfu1yhk
-12：像素符号：https://t.me/addemoji/YIfanfu19527
-13：qq经典表情：https://t.me/addemoji/YIfanfu1qq
-14：Snoop Dogg：https://t.me/addemoji/YIfanfu1520
-15：印尼小胖贴纸：https://t.me/addstickers/YIfanfu12025
+1：热门：https://t.me/addemoji/Yifanfu
+2：热门：https://t.me/addemoji/YifanfuTGvip
+3：财神：https://t.me/addemoji/Yifanfufacai
+4：闪字：https://t.me/addemoji/Yifanfushanzi
+5：熊猫：https://t.me/addemoji/Yifanfupanda
+6：东南亚：https://t.me/addemoji/YifanfuDNY
+7：米老鼠：https://t.me/addemoji/Yifanfumilaoshu
+8：龙年特辑：https://t.me/addemoji/Yifanfu2024
+9：蛇年特辑：https://t.me/addemoji/Yifanfushenian
+10：币圈专用：https://t.me/addemoji/Yifanfubtc
+11：车队专用：https://t.me/addemoji/Yifanfuyhk
+12：像素符号：https://t.me/addemoji/Yifanfu9527
+13：qq经典表情：https://t.me/addemoji/Yifanfuqq
+14：Snoop Dogg：https://t.me/addemoji/Yifanfu520
+15：印尼小胖贴纸：https://t.me/addstickers/Yifanfu2025
 ",
         disableWebPagePreview: true // 关闭链接预览
     );
@@ -16619,7 +16619,7 @@ else if(update.CallbackQuery.Data == "contactAdmin")
     {
         new [] // 新增的按钮行
         {
-            InlineKeyboardButton.WithUrl("直接联系作者", "https://t.me/YIfanfu1"),
+            InlineKeyboardButton.WithUrl("直接联系作者", "https://t.me/Yifanfu"),
             InlineKeyboardButton.WithCallbackData("由作者联系您", "authorContactRequest")
         }
     });
@@ -16675,7 +16675,7 @@ else if(update.CallbackQuery.Data == "mingling" && update.CallbackQuery.From.Id 
 11： 波场api修改： 10609102-669a-4cf4-8c36-cc3ed97f9a30    2f9385ef-2820-4caa-9f74-e720e1a39a75    https://www.trongrid.io/dashboard   都是免费的api，随便注册即可
 12： 波场官网api修改：  369e85e5-68d3-4299-a602-9d8d93ad026a   0c138945-fd9f-4390-b015-6b93368de1fd   https://tronscan.org/#/myaccount/apiKeys  都是免费的api，随便注册即可
 13：  以太坊api： WR9Z9H4MRK5CP8817WF4RDAI15PGRI2WV4    https://etherscan.io/apidashboard   都是免费的api，随便注册即可
-14： 替换管理员链接： t.me/YIfanfu1 或 @YIfanfu1
+14： 替换管理员链接： t.me/Yifanfu 或 @Yifanfu
 15： 替换机器人链接： t.me/BuyTrxbot 或 @BuyTrxbot
 16： 会员价格如有需要也可以修改
 17：// 定义API密钥   private static readonly string[] ApiKeys = new[]   监听USDT 秘钥需修改，随便注册  https://www.trongrid.io/dashboard
@@ -17232,7 +17232,7 @@ if (message.Type == MessageType.ChatMembersAdded)
                 int secondMessageId = secondMessage.MessageId; // 使用int类型以匹配API要求
         
                 // 发送带有链接的文本消息并记录消息ID
-                string adminLink = "t.me/YIfanfu1"; // 管理员的Telegram链接
+                string adminLink = "t.me/Yifanfu"; // 管理员的Telegram链接
                 string messageWithLink = "汇率表每10分钟更新发送一次！如需关闭请" + $"<a href=\"https://{adminLink}\">联系作者</a>！";
                 var thirdMessage = await botClient.SendTextMessageAsync(
                     chatId: chatId,
@@ -18647,7 +18647,7 @@ if (messageText.Contains("作者") || messageText.Contains("管理") || messageT
     {
         new [] // first row
         {
-            InlineKeyboardButton.WithUrl("直接联系作者", "https://t.me/YIfanfu1"),
+            InlineKeyboardButton.WithUrl("直接联系作者", "https://t.me/Yifanfu"),
             InlineKeyboardButton.WithCallbackData("由作者联系您", "authorContactRequest")
         }
     });
@@ -21546,21 +21546,21 @@ if (messageText.Contains("代开") || messageText.Contains("Premium"))
                 InlineKeyboardButton.WithSwitchInlineQuery("会员表情", 
                     "  会员开通成功，需要开通或续费会员可联系我！\n\n" +
                     "热门会员emoji表情包，点击链接即可添加：\n\n" +
-                    "1：热门：https://t.me/addemoji/YIfanfu1\n" +
-                    "2：热门：https://t.me/addemoji/YIfanfu1TGvip\n" +
-                    "3：财神：https://t.me/addemoji/YIfanfu1facai\n" +
-                    "4：闪字：https://t.me/addemoji/YIfanfu1shanzi\n" +
-                    "5：熊猫：https://t.me/addemoji/YIfanfu1panda\n" +
-                    "6：东南亚：https://t.me/addemoji/YIfanfu1DNY\n" +
-                    "7：米老鼠：https://t.me/addemoji/YIfanfu1milaoshu\n" +
-                    "8：龙年特辑：https://t.me/addemoji/YIfanfu12024\n" +
-                    "9：蛇年特辑：https://t.me/addemoji/YIfanfu1shenian\n" +
-                    "10：币圈专用：https://t.me/addemoji/YIfanfu1btc\n" +
-                    "11：车队专用：https://t.me/addemoji/YIfanfu1yhk\n" +
-                    "12：像素符号：https://t.me/addemoji/YIfanfu19527\n" +
-                    "13：qq经典表情：https://t.me/addemoji/YIfanfu1qq\n" +							   
-                    "14：Snoop Dogg：https://t.me/addemoji/YIfanfu1520\n" +	
-                    "15：印尼小胖贴纸：https://t.me/addstickers/YIfanfu12025")					
+                    "1：热门：https://t.me/addemoji/Yifanfu\n" +
+                    "2：热门：https://t.me/addemoji/YifanfuTGvip\n" +
+                    "3：财神：https://t.me/addemoji/Yifanfufacai\n" +
+                    "4：闪字：https://t.me/addemoji/Yifanfushanzi\n" +
+                    "5：熊猫：https://t.me/addemoji/Yifanfupanda\n" +
+                    "6：东南亚：https://t.me/addemoji/YifanfuDNY\n" +
+                    "7：米老鼠：https://t.me/addemoji/Yifanfumilaoshu\n" +
+                    "8：龙年特辑：https://t.me/addemoji/Yifanfu2024\n" +
+                    "9：蛇年特辑：https://t.me/addemoji/Yifanfushenian\n" +
+                    "10：币圈专用：https://t.me/addemoji/Yifanfubtc\n" +
+                    "11：车队专用：https://t.me/addemoji/Yifanfuyhk\n" +
+                    "12：像素符号：https://t.me/addemoji/Yifanfu9527\n" +
+                    "13：qq经典表情：https://t.me/addemoji/Yifanfuqq\n" +							   
+                    "14：Snoop Dogg：https://t.me/addemoji/Yifanfu520\n" +	
+                    "15：印尼小胖贴纸：https://t.me/addstickers/Yifanfu2025")					
             }
         }
         : new[] // 普通用户：两排按钮
@@ -21571,9 +21571,9 @@ if (messageText.Contains("代开") || messageText.Contains("Premium"))
             },
             new[] // 第二排：三个按钮
             {
-                InlineKeyboardButton.WithUrl("开3个月", "https://t.me/YIfanfu1?text=你好，我要代开3个月的TG会员（$24.99）"),
-                InlineKeyboardButton.WithUrl("开6个月", "https://t.me/YIfanfu1?text=你好，我要代开6个月的TG会员（$39.99）"),
-                InlineKeyboardButton.WithUrl("开1年", "https://t.me/YIfanfu1?text=你好，我要代开1年的TG会员（$70.99）")
+                InlineKeyboardButton.WithUrl("开3个月", "https://t.me/Yifanfu?text=你好，我要代开3个月的TG会员（$24.99）"),
+                InlineKeyboardButton.WithUrl("开6个月", "https://t.me/Yifanfu?text=你好，我要代开6个月的TG会员（$39.99）"),
+                InlineKeyboardButton.WithUrl("开1年", "https://t.me/Yifanfu?text=你好，我要代开1年的TG会员（$70.99）")
             }
         };
 
@@ -21599,21 +21599,21 @@ if (messageText.Contains("代开") || messageText.Contains("Premium"))
 9：电报目前月活跃用户超10亿，更多vip功能持续更新中</blockquote>
 
 热门会员emoji表情包，点击链接即可添加：
-<blockquote expandable>1：热门：<a href='https://t.me/addemoji/YIfanfu1'>https://t.me/addemoji/YIfanfu1</a>
-2：热门：<a href='https://t.me/addemoji/YIfanfu1TGvip'>https://t.me/addemoji/YIfanfu1TGvip</a>
-3：财神：<a href='https://t.me/addemoji/YIfanfu1facai'>https://t.me/addemoji/YIfanfu1facai</a>
-4：闪字：<a href='https://t.me/addemoji/YIfanfu1shanzi'>https://t.me/addemoji/YIfanfu1shanzi</a>
-5：熊猫：<a href='https://t.me/addemoji/YIfanfu1panda'>https://t.me/addemoji/YIfanfu1panda</a>
-6：东南亚：<a href='https://t.me/addemoji/YIfanfu1DNY'>https://t.me/addemoji/YIfanfu1DNY</a>
-7：米老鼠：<a href='https://t.me/addemoji/YIfanfu1milaoshu'>https://t.me/addemoji/YIfanfu1milaoshu</a>
-8：龙年特辑：<a href='https://t.me/addemoji/YIfanfu12024'>https://t.me/addemoji/YIfanfu12024</a>
-9：蛇年特辑：<a href='https://t.me/addemoji/YIfanfu1shenian'>https://t.me/addemoji/YIfanfu1shenian</a>
-10：币圈专用：<a href='https://t.me/addemoji/YIfanfu1btc'>https://t.me/addemoji/YIfanfu1btc</a>
-11：车队专用：<a href='https://t.me/addemoji/YIfanfu1yhk'>https://t.me/addemoji/YIfanfu1yhk</a>
-12：像素符号：<a href='https://t.me/addemoji/YIfanfu19527'>https://t.me/addemoji/YIfanfu19527</a>
-13：qq经典表情：<a href='https://t.me/addemoji/YIfanfu1qq'>https://t.me/addemoji/YIfanfu1qq</a>
-14：Snoop Dogg：<a href='https://t.me/addemoji/YIfanfu1520'>https://t.me/addemoji/YIfanfu1520</a>
-15：印尼小胖贴纸：https://t.me/addstickers/YIfanfu12025</blockquote>";
+<blockquote expandable>1：热门：<a href='https://t.me/addemoji/Yifanfu'>https://t.me/addemoji/Yifanfu</a>
+2：热门：<a href='https://t.me/addemoji/YifanfuTGvip'>https://t.me/addemoji/YifanfuTGvip</a>
+3：财神：<a href='https://t.me/addemoji/Yifanfufacai'>https://t.me/addemoji/Yifanfufacai</a>
+4：闪字：<a href='https://t.me/addemoji/Yifanfushanzi'>https://t.me/addemoji/Yifanfushanzi</a>
+5：熊猫：<a href='https://t.me/addemoji/Yifanfupanda'>https://t.me/addemoji/Yifanfupanda</a>
+6：东南亚：<a href='https://t.me/addemoji/YifanfuDNY'>https://t.me/addemoji/YifanfuDNY</a>
+7：米老鼠：<a href='https://t.me/addemoji/Yifanfumilaoshu'>https://t.me/addemoji/Yifanfumilaoshu</a>
+8：龙年特辑：<a href='https://t.me/addemoji/Yifanfu2024'>https://t.me/addemoji/Yifanfu2024</a>
+9：蛇年特辑：<a href='https://t.me/addemoji/Yifanfushenian'>https://t.me/addemoji/Yifanfushenian</a>
+10：币圈专用：<a href='https://t.me/addemoji/Yifanfubtc'>https://t.me/addemoji/Yifanfubtc</a>
+11：车队专用：<a href='https://t.me/addemoji/Yifanfuyhk'>https://t.me/addemoji/Yifanfuyhk</a>
+12：像素符号：<a href='https://t.me/addemoji/Yifanfu9527'>https://t.me/addemoji/Yifanfu9527</a>
+13：qq经典表情：<a href='https://t.me/addemoji/Yifanfuqq'>https://t.me/addemoji/Yifanfuqq</a>
+14：Snoop Dogg：<a href='https://t.me/addemoji/Yifanfu520'>https://t.me/addemoji/Yifanfu520</a>
+15：印尼小胖贴纸：https://t.me/addstickers/Yifanfu2025</blockquote>";
 
 
     // 尝试发送图片和文字
@@ -21672,7 +21672,7 @@ if (messageText.Equals("/about", StringComparison.OrdinalIgnoreCase) ||
         {
             new[]
             {
-                InlineKeyboardButton.WithUrl("联系作者", "https://t.me/YIfanfu1?text=你好")
+                InlineKeyboardButton.WithUrl("联系作者", "https://t.me/Yifanfu?text=你好")
             }
         });
     }
@@ -23925,7 +23925,7 @@ if (messageText.StartsWith("代解") && message.From.Id == 8992100332)
 // 检查是否接收到了 "预支" 消息，收到就发送指定文本
 if (messageText.StartsWith("预支"))
 {
-    string adminUsername = "YIfanfu1";
+    string adminUsername = "Yifanfu";
     string adminLink = $"https://t.me/{adminUsername}";
     string responseText = "请发送需要预支TRX的钱包地址查询是否满足要求：\n同时满足2点即可预支：\n⚠️仅限累计兑换 500 USDT 以上地址，\n⚠️地址余额大于 500 USDT且TRX余额低于13，\n⚠️预支的TRX能量仅够您向本机器人转账一次。\n\n如果查询满足条件，可<a href=\"" + adminLink + "\">联系管理员</a>直接预支TRX能量！";
     await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: responseText, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, disableWebPagePreview: true);
@@ -24972,7 +24972,7 @@ async Task<Message> UnBindAddress(ITelegramBotClient botClient, Message message)
             var UserId = message.From.Id;
             var _rateRepository = provider.GetRequiredService<IBaseRepository<TokenRate>>();
             var rate = await _rateRepository.Where(x => x.Currency == Currency.USDT && x.ConvertCurrency == Currency.TRX).FirstAsync(x => x.Rate);
-            string adminLink = "t.me/YIfanfu1"; // 替换为你的管理员的Telegram链接
+            string adminLink = "t.me/Yifanfu"; // 替换为你的管理员的Telegram链接
             string adminText = $"<a href=\"http://{adminLink}\">联系管理</a>";
             string leftPointingIndex = char.ConvertFromUtf32(0x1F448);
             
@@ -25116,7 +25116,7 @@ async Task<Message> PriceTRX(ITelegramBotClient botClient, Message message)
     var UserId = message.From.Id;
     var _rateRepository = provider.GetRequiredService<IBaseRepository<TokenRate>>();
     var rate = await _rateRepository.Where(x => x.Currency == Currency.USDT && x.ConvertCurrency == Currency.TRX).FirstAsync(x => x.Rate);
-    string adminLink = "t.me/YIfanfu1"; // 替换为你的管理员的Telegram链接
+    string adminLink = "t.me/Yifanfu"; // 替换为你的管理员的Telegram链接
     string adminText = $"<a href=\"http://{adminLink}\">联系管理</a>";
     string leftPointingIndex = char.ConvertFromUtf32(0x1F448);
     const long AdminUserId = 8992100332; // 管理员 ID	
