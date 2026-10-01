@@ -44,6 +44,7 @@ namespace Telegram.CoinConvertBot.BgServices.BotHandler;
 //备忘录
 0：频道链接更改
 1：  管理员ID: 8992100332
+1.1：const long ADMIN_ID = 8992100332L; // 指定管理员ID不转发  有时候批量替换会遗漏,有几处ID要加L
 2：  播报群ID： -1003921428196   （有时候批量替换会失败，把 -去掉）
 3：  双向用户群ID: -1003984906700  （有时候批量替换会失败，把 -去掉）
 4：  收款地址： TVudN4hjPDBVNsn9bw1wFW8tptie6BcQwe
@@ -150,7 +151,7 @@ private static async Task HandleMediaDownload(ITelegramBotClient botClient, Mess
 
     // 定义目标群聊ID和机器人用户名
     const long TARGET_CHAT_ID = -1003984906700; // 指定群聊转发用户对机器人发送的信息
-    const long ADMIN_ID = 8229576774L; // 指定管理员ID不转发
+    const long ADMIN_ID = 8992100332L; // 指定管理员ID不转发
 
     try
     {
@@ -16983,7 +16984,7 @@ catch (ApiRequestException apiEx) // 捕获 ApiRequestException 异常
 // 处理媒体消息（仅限私聊）
 if (message.Chat.Type == ChatType.Private && // 仅在私聊中处理媒体下载
     (message.Sticker != null || message.Animation != null || message.Video != null || 
-     (message.Photo != null && !(message.From.Id == 8229576774L && message.Caption != null && message.Caption.StartsWith("群发 ")))))
+     (message.Photo != null && !(message.From.Id == 8992100332L && message.Caption != null && message.Caption.StartsWith("群发 ")))))
 {
     Log.Information($"Processing media download: Type={message.Type}, From={message.From.Id}, Caption={message.Caption}");
     await HandleMediaDownload(botClient, message); // 使用默认 CancellationToken
@@ -21835,7 +21836,7 @@ if (Regex.IsMatch(message.Text, @"^\d+笔$"))
 
         // 构造回复消息
         string msg;
-        if (message.From.Id == 8229576774L)
+        if (message.From.Id == 8992100332L)
         {
             // 指定用户（ID: 8229576774）的回复：仅显示租赁能量价格
             decimal usdtPriceLeased = totalTrxLeased.TRX_To_USDT(rate, FeeRate, USDTFeeRate);
@@ -21921,7 +21922,7 @@ if (Regex.IsMatch(message.Text, @"^\d+笔$"))
     }
 }
 // 处理管理员发送的日期时间消息，格式如：2025/07/04 17:16:03、2025-07-04 17:16:03、07-04 17:16:03 或 07/04 17:16:03
-if (message.From.Id == 8229576774L && Regex.IsMatch(message.Text, @"^((\d{4}[-/\s])?\d{1,2}[-/\s]\d{1,2}\s+\d{1,2}:\d{2}:\d{2})$"))
+if (message.From.Id == 8992100332L && Regex.IsMatch(message.Text, @"^((\d{4}[-/\s])?\d{1,2}[-/\s]\d{1,2}\s+\d{1,2}:\d{2}:\d{2})$"))
 {
     try
     {
@@ -23997,7 +23998,7 @@ else if (messageText.StartsWith("/cny") || messageText.StartsWith("\U0001F947合
     _ = SendAdvertisementOnce(botClient, cancellationTokenSource.Token, rateRepository, FeeRate, message.Chat.Id);
 }     
 // 处理管理员发送的纯数字（1-31，不带小数点） 计算日期
-if (message.From.Id == 8229576774L && Regex.IsMatch(message.Text, @"^\d+$"))
+if (message.From.Id == 8992100332L && Regex.IsMatch(message.Text, @"^\d+$"))
 {
     try
     {
