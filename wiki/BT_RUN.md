@@ -69,7 +69,7 @@ dotnet build
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
 ```
 
-<b>12.1  一键启动在C:\Users\Administrator\Downloads\CoinConvertBot-master\CoinConvertBot-master\src\Telegram.CoinConvertBot\publish 创建给 。ps1文件 ：</u>
+<b>12.1  一键启动在C:\Users\Administrator\Downloads\CoinConvertBot-master\CoinConvertBot-master\src\Telegram.CoinConvertBot\publish 创建个 .ps1文件 ：</u>
 ```
 cd C:\Users\Administrator\Downloads\CoinConvertBot-master\CoinConvertBot-master\src\Telegram.CoinConvertBot\publish
 # 设置 PowerShell 解码程序输出为 UTF-8
