@@ -29,7 +29,7 @@ Administrator
 <b>5 下载安装包 浏览器  </u>
 
 ```
-https://codeload.github.com/xiaobai2023123412412343/CoinConvertBot/zip/refs/heads/master
+https://codeload.github.com/qianwan480-dotcom/CoinConvertBot/zip/refs/heads/master
 ```
 
 <b>6 安装.NET 6.0  浏览器   </u>
