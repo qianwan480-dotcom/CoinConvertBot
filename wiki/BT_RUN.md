@@ -64,7 +64,7 @@ cd C:\Users\Administrator\Downloads\CoinConvertBot-master\CoinConvertBot-master\
 dotnet build
 ```
 
-<b>12 发布程序 终端 ：</u>
+<b>12 发布程序 终端 ： 一键启动在收藏夹</u>
 ```
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
 ```
