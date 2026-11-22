@@ -10140,7 +10140,7 @@ private static async Task SendHelpMessageAsync(ITelegramBotClient botClient, Mes
         string adminLinkText = $"<a href=\"{adminLink}\">管理员！</a>";
 
         string helpText = "更改电报语言：在机器人对话框直接发送：<code>中文</code> 自动返回包括原zh_cn等众多简体中文语言包，点击任意链接即可更改界面语言！\n\n" +
-                          "关于兑换：<code>点击U兑TRX，给收款地址转10u以上的任意金额，机器人自动返回TRX到原付款地址，过程全自动，无人工干预！(点击机器人任意菜单只要有反应即可正常兑换，无需联系管理二次确认)</code>\n\n" +
+                          "关于兑换：<code>点击U兑TRX，给收款地址转20u以上的任意金额，机器人自动返回TRX到原付款地址，过程全自动，无人工干预！(点击机器人任意菜单只要有反应即可正常兑换，无需联系管理二次确认)</code>\n\n" +
                           "<blockquote expandable>实时汇率：<code>TRX能量跟包括比特币在内的所有数字货币一样，价格起起落落有涨有跌，受市场行情影响，机器人的兑换汇率自动跟随市场行情进行波动！</code>\n\n" +                
                           "地址监听：<code>绑定您的钱包地址，即可开启交易通知！一有交易就提示，假U，假截图，完全不起作用。发送：绑定 Txxxxxxx(您的钱包地址，，中间有个空格)即可完成绑定！ 注：为了不浪费服务器资源，暂不支持监听交易所地址，判定标准为：钱包余额大于500万USDT或累计交易笔数大于30万笔！同时0.01USDT以下的交易将会被过滤掉！ </code>\n\n" +
                           "能量监控：<code>绑定钱包地址后，机器人将持续监控TRX余额，当TRX余额不足100时机器人会自动下发提醒！</code>\n\n" +            
@@ -22881,6 +22881,20 @@ if (coinInfo != null && coinInfo.Count > 0)
     //Console.WriteLine($"从本地缓存获取到数据：{symbol}");
     // 从缓存获取信息
     imageUrl = coinInfo.TryGetValue("logo_png", out JsonElement logoElement) ? logoElement.GetString() : null;
+    // 非小号图片接口已换域名：旧 s1.feixiaohaolive.com 已解析不到，且前8大币 logo 缺斜杠(comlogo)
+    // 统一取 logo/ 后段拼到新域名 s2.flink2.com，实测 200 (如 1/bitcoin.png -> https://s2.flink2.com/logo/1/bitcoin.png)
+    if (!string.IsNullOrEmpty(imageUrl))
+    {
+        var logoIdx20261122 = imageUrl.IndexOf("logo/", StringComparison.OrdinalIgnoreCase);
+        if (logoIdx20261122 >= 0)
+        {
+            var logoPath20261122 = imageUrl.Substring(logoIdx20261122 + "logo/".Length);
+            var queryIdx20261122 = logoPath20261122.IndexOf('?');
+            if (queryIdx20261122 >= 0) logoPath20261122 = logoPath20261122.Substring(0, queryIdx20261122);
+            if (!string.IsNullOrEmpty(logoPath20261122))
+                imageUrl = "https://s2.flink2.com/logo/" + logoPath20261122;
+        }
+    }
     if (imageUrl != null) //Console.WriteLine($"从本地缓存获取到图片: {imageUrl}");
 
     marketCap = coinInfo.TryGetValue("market_cap_usd", out JsonElement marketCapElement) && marketCapElement.TryGetDecimal(out decimal mc) ? mc : 0;
@@ -23166,13 +23180,28 @@ var inlineKeyboard = new InlineKeyboardMarkup(new[]
 if (!string.IsNullOrEmpty(imageUrl))
 {
     // 如果有图片URL，则发送图片和币种信息作为图片的说明
-    await botClient.SendPhotoAsync(
-        chatId: message.Chat.Id,
-        photo: imageUrl,
-        caption: reply,
-        parseMode: ParseMode.Html,
-        replyMarkup: inlineKeyboard
-    );
+    // 发图失败(如图片链接失效)改发同一段文字，格式不变，不让整条回复消失
+    try
+    {
+        await botClient.SendPhotoAsync(
+            chatId: message.Chat.Id,
+            photo: imageUrl,
+            caption: reply,
+            parseMode: ParseMode.Html,
+            replyMarkup: inlineKeyboard
+        );
+    }
+    catch (Exception photoEx20261122)
+    {
+        Console.WriteLine($"[查币] 发图失败改发文字: {imageUrl} {photoEx20261122.Message}");
+        await botClient.SendTextMessageAsync(
+            chatId: message.Chat.Id,
+            text: reply,
+            parseMode: ParseMode.Html,
+            replyMarkup: inlineKeyboard,
+            disableWebPagePreview: true
+        );
+    }
 }
 else
 {
